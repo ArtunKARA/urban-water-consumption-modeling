@@ -1,0 +1,36 @@
+name: Research infrastructure checks
+on: [push, pull_request]
+jobs:
+  postgres-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: urban_water
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_DB: urban_water_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U urban_water -d urban_water_test"
+          --health-interval 5s --health-timeout 5s --health-retries 15
+    env:
+      UW_TEST_DATABASE_URL: postgresql://urban_water:ci-only-password@127.0.0.1:5432/urban_water_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.4"
+      - run: uv sync --locked --python 3.12
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - name: Install matching PostgreSQL dump and restore clients
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          curl --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc > /dev/null
+          . /etc/os-release
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-18
+          echo "/usr/lib/postgresql/18/bin" >> "$GITHUB_PATH"
+      - run: uv run pytest -q

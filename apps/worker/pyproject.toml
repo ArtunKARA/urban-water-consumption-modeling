@@ -1,0 +1,18 @@
+[project]
+name = "urban-water-worker"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = ["urban-water-core"]
+
+[project.scripts]
+uw-worker = "urban_water_worker.main:main"
+
+[tool.uv.sources]
+urban-water-core = { workspace = true }
+
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/urban_water_worker"]

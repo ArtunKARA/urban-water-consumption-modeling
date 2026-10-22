@@ -1,0 +1,15 @@
+[project]
+name = "urban-water-simulator"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = ["urban-water-contracts"]
+
+[tool.uv.sources]
+urban-water-contracts = { workspace = true }
+
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/urban_water_simulator"]

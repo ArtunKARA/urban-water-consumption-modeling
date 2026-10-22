@@ -1,0 +1,19 @@
+name: urban-water-synthetic
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: urban_water
+      POSTGRES_DB: urban_water
+      POSTGRES_PASSWORD: ${UW_PG_PASSWORD:?Set UW_PG_PASSWORD for this synthetic environment}
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U urban_water -d urban_water"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+volumes:
+  pg_data:

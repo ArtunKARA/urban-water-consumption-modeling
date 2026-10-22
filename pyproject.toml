@@ -1,0 +1,36 @@
+[project]
+name = "urban-water-workspace"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "urban-water-contracts", "urban-water-core", "urban-water-simulator",
+  "urban-water-cli", "urban-water-worker",
+]
+
+[project.optional-dependencies]
+notebooks = ["ipykernel>=6,<8", "nbclient>=0.10,<1"]
+
+[tool.uv.workspace]
+members = ["packages/*", "apps/*"]
+
+[tool.uv.sources]
+urban-water-contracts = { workspace = true }
+urban-water-core = { workspace = true }
+urban-water-simulator = { workspace = true }
+urban-water-cli = { workspace = true }
+urban-water-worker = { workspace = true }
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "ruff>=0.11,<1"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = ["postgres: requires an isolated PostgreSQL test database"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

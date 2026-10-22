@@ -1,0 +1,41 @@
+version = 1
+status = "planned-not-executed"
+environment = "synthetic-first"
+
+[anomaly_verification]
+paper = "Siber-Fiziksel Su Şebekelerinde Anomali Tespiti İçin Durum Makineleri Tabanlı Açıklanabilir Yapay Zekâ Doğrulaması"
+inputs = ["time-resolved consumption", "coverage evidence", "event-level truth isolated from core"]
+baselines = ["threshold", "detector", "detector plus state machine"]
+metrics = ["event recall", "false alarms per household-day", "detection delay", "invalid transitions"]
+split = "chronological and separate household holdout; fit preprocessing only on training"
+explanations = "evaluate explanation stability separately from detector accuracy; no causal claim"
+formal_gate = "explicit data-to-symbol mapping, model/code conformance, deadlock, vacuity, counterexamples"
+artifacts = ["split manifest", "event matches", "metrics", "state traces", "formal checker logs"]
+
+[distributed_profiling]
+paper = "Kentsel Su Tüketiminde Davranışsal Kümeleme İçin Dağıtık Veri İşleme Tabanlı Analitik Mimari"
+inputs = ["consumption profiles", "optional time-versioned household context"]
+baselines = ["local pipeline", "distributed pipeline with equivalent semantics"]
+metrics = ["stage latency", "peak memory", "throughput", "failure recovery", "output equivalence"]
+controls = ["equal resources", "cold and warm runs", "repeated trials", "raw ETL and clustering measured separately"]
+cluster_equivalence = "allow label permutation and declared numerical tolerance"
+scope = "single-host containers do not establish multi-host scaling; amplified pulses do not enlarge household sample"
+artifacts = ["workload manifest", "resource configuration", "stage timings", "equivalence report"]
+
+[context_forecasting]
+paper = "Bağlam-Farkındalıklı Veri Setleri ile Kuraklık Senaryoları Altında Mahalle Bazlı Su Talep Tahmini"
+targets = ["next calendar-day household total", "next 24 hourly household values"]
+baselines = ["seasonal naive", "history-only", "context-aware"]
+metrics = ["MAE", "RMSE", "WAPE with zero-denominator handling", "interval coverage"]
+split = "rolling origin plus separate household holdout; issuance-time available context only"
+daily_hourly = "separate reports; compare totals only when forecast intervals align"
+regional_gate = "actual regional totals, coverage and representativeness required for neighborhood validation"
+drought_gate = "hypothetical response under simulator assumptions is not measured causal drought response"
+artifacts = ["forecast issuance times", "fold manifests", "predictions", "uncertainty", "metrics and exclusions"]
+
+[cross_cutting]
+meter_performance = "requires independent reference volume or valid calibration evidence; resolution is not accuracy"
+sampling = "report initial/retained households and periods plus all exclusion reasons"
+context = "effective time and knowledge time; preserve unknown/refused/not applicable separately"
+synthetic = "physical usage -> sensor -> transport; independent truth and seed/config/version manifests"
+success = "negative findings are valid; do not tune the generator to hit grant metric targets"
