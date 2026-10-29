@@ -1,10 +1,16 @@
 # Mimari ve ilk teslimat sınırı
 
-Durum: ilk altyapı uygulaması. Ortam yalnızca sentetik veri içindir.
+Durum: ilk altyapı ve sayaç kaynak adaptörleri. Sentetik geliştirme ve ayrı
+açık araştırma ortamı desteklenir; kurumsal dağıtım hazır değildir.
 
 Bu repo; veri sözleşmesi, kaynak saklama, kalıcı veri alımı, kalite, zaman bazlı
 işleme ve dondurulmuş araştırma çıktısının ortak çekirdeğidir. Python/CLI/notebook
 ilk kullanım yoludur. Panel daha sonraki teslimattır.
+
+Kaynakların reader/normalizer arabirimleri ve yapılandırmadan seçimi için
+[değiştirilebilir kaynak tasarımı](source-adapters.md) uygulama geçişini tarif eder.
+Dosya/tek HTTP yanıtı ve JSONL/eşlemeli CSV sayaç yolu uygulanmıştır;
+[kullanım kapsamı](source-adapters-usage.md) diğer kayıt ailelerinden ayrıdır.
 
 ## Bağımlılık ve veri akışı
 
@@ -13,7 +19,7 @@ contracts <-- core <-- cli / worker / notebooks
     ^                 ^
     +-- simulator ----+ (yalnızca CLI üzerinden kaynak dosyası üretir)
 
-kaynak dosyası -> sıkıştırılmış özgün baytlar + SHA256
+dosya / HTTP nesnesi -> sıkıştırılmış özgün baytlar + SHA256 + sabit eşleme
               -> source + kalıcı job
               -> doğrulama + parçalı staging + checkpoint
               -> tek transaction ile measurement/provenance/quality yayını
@@ -67,6 +73,13 @@ korunur. Kanonik olay bir kez, her teslimatın kökeni provenance üzerinden tut
     sonucunu bildirir. Kalıcı job state ile veri yeterliliği ayrıdır.
 12. Yayınlanmış kısmi kaynağın yeniden işlenmesinde mevcut sonuç ve kalite, yeni yayın
     tamamlanana kadar korunur. Başarısız yeniden işleme eski yayını kaldırmaz.
+
+25 Ekim sağlamlaştırması: Konfigürasyonlar ayrı değişmez sürümlere taşındı; işler
+bu sürümleri pin'ler, ölçümler kullanılan sürüme FK ile bağlıdır. Dataset v2 gözlenen
+özetin yanında normalizasyon ve revision kökenini Parquet olarak dondurur. Cohort
+kapsamı özet, örneklem sayısı, metadata ve kaynak bağımlılıklarına uygulanır. Uzun
+I/O'da fenced heartbeat ve worker'da DB yeniden bağlantı davranışı vardır. On
+inceleme bulgusunun kabul kanıtı `docs/audit-fixes.md` içinde kayıtlıdır.
 
 ## Ölçek sınırları ve sonraki geliştirme
 

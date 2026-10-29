@@ -1,0 +1,498 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:urban-water:research-data-contract:0.1",
+  "title": "Kentsel su araştırması — girdi ve çıktı sözleşmesi taslağı",
+  "description": "Veri örneği değildir. Gerçek veya sentetik kaynağın ortak araştırma formatını tarif eder. Aynı dosya iki ayrı paket türünü tanımlar: InputPackage ve OutputPackage.",
+  "$comment": "Öneri aşamasındadır. Mevcut CLI bu paketi henüz kabul etmez. Mevcut synthetic.measurement.v1 sözleşmesi ve dataset v1/v2 çıktıları değiştirilmemiştir. Gerçek Manas/İSU ham formatı ancak örnek kayıtlarla eşleştirilecektir.",
+  "x-status": "proposal-for-review",
+  "x-revision": "2026-10-27-audit-1",
+  "x-layout": {
+    "input": {
+      "meta": "Paket kimliği, sürümü, çalışma ve kaynak ortamı",
+      "sources": "Kaynak envanteri ve kaynak biçimi sürümleri",
+      "registry": {
+        "areas": "İlçe/mahalle kodları ve üst bölge ilişkisi",
+        "households": {
+          "institutional_profiles": "Haneye ait kurumsal özelliklerin tarihli kayıtları",
+          "member_profiles": "İsimsiz kişi/üye koduna bağlı kaynak özellikleri"
+        },
+        "cohorts": "Araştırma grupları",
+        "memberships": "Hane -> araştırma grubu, geçerlilik dönemiyle",
+        "measurement_points": {
+          "household_links": "Ölçüm noktası -> hane; tek, ortak veya kapsamı bilinmeyen ilişki"
+        },
+        "subscriptions": "Kodlanmış abonelik -> ölçüm noktası; gerçek abone numarası kurumda kalır",
+        "meters": {
+          "streams": {
+            "configurations": "Sayaç -> ölçüm akışı -> değişmez ölçüm konfigürasyonu"
+          }
+        },
+        "installations": "Sayaç -> ölçüm noktası, geçerlilik dönemiyle"
+      },
+      "observations": {
+        "survey_responses": "Hane koduna bağlı idari alanlar, onay durumu ve 14 araştırma yanıtı",
+        "household_events": "Hane koduna bağlı tarihli olay/bildirimler",
+        "meter_measurements": "Stream koduna bağlı ölçümler; hane veya kişi içine kopyalanmaz",
+        "device_status": "Varsa cihaz bağlantı/durum gözlemleri",
+        "monthly_consumption": "Ayrı kurumsal dönem tüketimleri",
+        "area_consumption": "Kurumsal bölge toplamları",
+        "weather": "Bölge ve zaman bazlı çevresel gözlemler veya tahminler",
+        "meter_error_curves": "Sayaç teknolojisi/modeli için referans hata eğrileri"
+      }
+    },
+    "output": {
+      "meta": "Run kimliği, kullanılan girdi/dataset ve kod sürümü",
+      "quality": "Kabul, tekrar, karantina, eşleştirme ve kapsama raporu",
+      "artifacts": "Parquet/JSON gibi çıktı dosyalarının kimlik ve hash bilgisi",
+      "results": {
+        "volume_summaries": "Ölçüm noktası/hane/bölge için gözlenen hacim",
+        "profiles": "Davranış profili/küme sonuçları",
+        "forecasts": "Ayrı günlük ve saatlik talep tahminleri",
+        "anomalies": "Anomali adayları ve varsa doğrulama durumu",
+        "meter_performance": "Referans/varsayım temeli belirtilmiş sayaç hata sonuçları",
+        "explanations": "Tahmin, profil, anomali veya karar kaydına bağlı açıklamalar",
+        "decisions": "Kural/durum makinesi sonuçları",
+        "evaluation": "Deney ve veri bölmesi belirtilmiş başarı ölçümleri"
+      }
+    }
+  },
+  "x-relations": [
+    "Her pakette tek study_id bulunur; paket study_id'si metadata'dadır.",
+    "registry.households[].household_id araştırma HANE_ID kodudur; gerçek abone numarası değildir.",
+    "institutional_profiles ve member_profiles kendi household kaydının içindedir; household_id tekrar yazılmaz.",
+    "member_profiles[].member_id hane içinde kararlı, isimsiz bir araştırma kodudur; aynı kişi birden çok tarihte kaydedilebilir.",
+    "memberships[].household_id -> registry.households[].household_id; cohort_id -> registry.cohorts[].cohort_id.",
+    "measurement_points[].household_links[].household_id -> registry.households[].household_id.",
+    "households[].institutional_profiles[].area_id -> registry.areas[].area_id; mahalle bilgisi kişi özelliği değildir.",
+    "meters[].streams[].stream_code paketler arasında kararlıdır; mevcut Measurement.stream_code alanıyla eşleşir.",
+    "installations[].meter_id -> registry.meters[].meter_id; measurement_point_id -> registry.measurement_points[].measurement_point_id.",
+    "subscriptions[].measurement_point_id -> registry.measurement_points[].measurement_point_id; monthly_consumption[].subscription_id -> subscriptions[].subscription_id.",
+    "meter_measurements[].stream_code -> registry.meters[].streams[].stream_code; hane ataması ölçüm zamanındaki kurulum ve kapsamdan çözülür.",
+    "survey_responses ve household_events household_id ile haneye bağlanır.",
+    "Her source_ref.source_id sources[].source_id'ye veya önceden kayıtlı kaynak envanterine bağlanır.",
+    "Output.meta.input_package_ids ve dataset_id sonuçların kaynak zincirini belirtir. Hedefler target.type + target.id ile gösterilir."
+  ],
+  "x-rules": [
+    "Bu dosya mantıksal sözleşmedir; bütün çalışma verisinin tek dev JSON dosyasında taşınmasını gerektirmez. Büyük akışlar paketlenir veya kaynak/artifact referansıyla taşınır.",
+    "Input ve output aynı veri dosyası değildir. Bu şemadaki oneOf ile her paket yalnız bir türe uyar.",
+    "Bir listede alanın bulunmaması bu pakette verilmediği anlamına gelir. Boş liste yalnız bu pakette kayıt bulunmadığını söyler; mevcut kayıtları silmez.",
+    "JSON Schema tipleri ve yapıyı denetler. Kimlik tekilliği, kayıtlar arası referanslar, zaman sırası, toplamlar ve geçerlilik çakışmaları ayrıca semantik doğrulama gerektirir.",
+    "Tüm *_id ve *_code alanları araştırma içi kararlı kodlardır. Ad, telefon, açık adres, gerçek abone numarası ve imzalı onam kopyası bu sözleşmeye alınmaz; kimlik bağlantı anahtarı sağlayıcıda kalır.",
+    "Ölçüm tekilliği stream_code + event_id + revision'dır. Aynı zaman ve değerdeki farklı olaylar otomatik tekrar sayılmaz. Gerçek kaynak olay kimliği adaptör örnekleriyle doğrulanmalıdır.",
+    "Zaman damgaları açık UTC offset'i taşır. Dönemler [start,end) olarak yorumlanır. Bilinmeyen veya yaklaşık kaynak tarihi kesin zamana dönüştürülmez.",
+    "Değişebilir profil ve yanıtlar kaynak/sürüm/gözlem tarihiyle korunur. known_at bilgiye erişilme anıdır; geçmiş tahminlere daha sonra öğrenilmiş bilgi sızdırılmaz. Ölçümlerde received_at sağlayıcı saatiyle karıştırılmaz: source.known_at araştırma sisteminin kaynağa erişim anıdır. Bu an bilinmiyorsa gerçek işletim backtest'inde erişilebilirlik varsayılmaz; aynı olay/revision birden fazla kaynakta varsa ilk kanıtlı araştırma erişimi kullanılır.",
+    "Ortak veya kapsamı bilinmeyen sayaç toplamı tek hane tüketimi olarak yayımlanmaz; hanelere eşit dağıtılmaz.",
+    "Pulse, endeks, dönem tüketimi ve aylık kurumsal tüketim aynı suyun alternatif temsilleri olabilir; birlikte toplanmaz.",
+    "Gelir sınıfları ve konut kategorileri kaynak sözlüğüyle saklanır. Eski düşük/orta/yüksek gelir sınıfından yeni asgari ücret bandı uydurulmaz. 8+ kişi tam 8 kişi değildir.",
+    "K05 Hayır ise K06 not_applicable olmalıdır. E01 yanıtlanmadığında bütün cihazlar yok sayılmaz. Hiçbiri ile cihazlar aynı yanıtta birlikte işaretlenemez.",
+    "Güncel kısa ankette olmayan yaş/eğitim gibi bilgiler mevcut kurumsal kaynaktan gelirse ayrı member_profiles kayıtlarında tutulur; ankette sorulmuş gibi gösterilmez.",
+    "Anketin D07/O01 bildirimi kesin zamanlı doğrulanmış kaçak etiketi değildir. Bildirim, uzman doğrulaması ve simülatör gerçeği ayrı tutulur.",
+    "Sıfır, bilinmeyen, yanıtlanmamış ve uygulanamaz farklıdır. Kaynak tek seçenekte bilmiyor/yanıtlamak istemiyor diyorsa bu ayrım geriye dönük uydurulmaz.",
+    "100 mL/pulse hacim çözünürlüğüdür; ölçüm doğruluğu veya örnekleme süresi değildir. Debi ve kullanım olayı özellikleri yalnız veri çözünürlüğü elverdiğinde hesaplanır.",
+    "Sayaç konfigürasyonu sürümleri değişmezdir; ölçüm uygun zaman aralığındaki konfigürasyonla doğrulanır. Verilmeyen kalibrasyon veya hata eğrisi gerçek kabul edilmez.",
+    "Açıklama kaydı result_type + result_id ile profil, tahmin, anomali, sayaç performansı veya karara bağlanır. Açıklama katsayısı tek başına nedensel etki değildir.",
+    "Cihaz durumu yokken pulse yokluğu bağlantı kesintisi veya kesin sıfır kullanım olarak etiketlenmez.",
+    "Hava tahmini issued_at bilgisiyle saklanır; işletim tahmininde tahmin anında bilinen girdiler kullanılır. Gözlenmiş gelecek hava ayrı bir deneydir.",
+    "Sentetik üretimin gizli gerçek olay/etiketleri InputPackage'e girmez. Değerlendirme tarafında ayrı referans veri olarak tutulur.",
+    "Output her sonuç ailesi için status + reason_codes + records taşır. İstenmeyen analiz not_requested, yeterli girdi olmayan analiz insufficient_data bildirir. Üretilemeyen sayısal sonuç null olur, sıfır olmaz.",
+    "Günlük tahmin sonraki yerel takvim gününü, saatlik tahmin sonraki 24 saatlik aralığı hedefler. Yalnız aynı dönemleri kapsadığında toplamları karşılaştırılır.",
+    "Mahalle sonucu için bağımsız kurumsal toplam ve temsil koşulları gerekir. Pilot hanelerin toplamı otomatik mahalle toplamı değildir.",
+    "RZ01/RZ02 bilgisi bu forma göre yeni saha katılım koşulunu bildirir; eski kurumsal kayıtların izin durumu ayrı kaynak/izin referansıyla değerlendirilir."
+  ],
+  "oneOf": [
+    { "$ref": "#/$defs/InputPackage" },
+    { "$ref": "#/$defs/OutputPackage" }
+  ],
+  "$defs": {
+    "Id": { "type": "string", "minLength": 1, "maxLength": 128, "description": "Kararlı araştırma kodu; veri tabanının iç UUID'siyle aynı olmak zorunda değildir." },
+    "Timestamp": { "type": "string", "format": "date-time", "pattern": "(?:Z|[+-][0-9]{2}:[0-9]{2})$" },
+    "Date": { "type": "string", "format": "date" },
+    "Decimal": { "type": "string", "pattern": "^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$", "description": "Noktalı, kayıpsız ondalık metin. Bilimsel gösterim ve yerel virgül kullanılmaz." },
+    "Volume": { "type": "string", "pattern": "^(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$", "description": "Negatif olmayan kayıpsız ondalık; birim ilgili alanda ayrıca belirtilir." },
+    "Period": {
+      "type": "object", "additionalProperties": false, "required": ["start", "end"],
+      "properties": { "start": { "$ref": "#/$defs/Timestamp" }, "end": { "$ref": "#/$defs/Timestamp" } },
+      "description": "Dahil başlangıç, hariç bitiş. start < end semantik doğrulamada denetlenir."
+    },
+    "SourceRef": {
+      "type": "object", "additionalProperties": false, "required": ["source_id", "known_at"],
+      "properties": {
+        "source_id": { "$ref": "#/$defs/Id" },
+        "record_locator": { "type": ["string", "null"], "description": "Kaynak içindeki satır/hücre/olay referansı; katılımcı kimlik bilgisi değildir." },
+        "observed_on": { "anyOf": [{ "$ref": "#/$defs/Date" }, { "type": "null" }] },
+        "known_at": { "$ref": "#/$defs/Timestamp" }
+      }
+    },
+    "Source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_id", "source_type", "source_schema_version"],
+      "properties": {
+        "source_id": { "$ref": "#/$defs/Id" },
+        "source_type": { "enum": ["institutional_profile", "survey", "meter", "device_status", "billing", "area_total", "weather", "meter_reference", "administrative"] },
+        "source_schema_version": { "type": "string", "minLength": 1 },
+        "known_at": { "anyOf": [{ "$ref": "#/$defs/Timestamp" }, { "type": "null" }], "description": "Araştırma sisteminin bu kaynak nesnesine eriştiği ilk kanıtlı an; sağlayıcının received_at alanından ayrıdır. Verilmezse erişim anı bilinmiyor demektir. Sentetik ortamda simüle edilmiş bilgi erişim saati ayrıca açıkça belgelenir." },
+        "original_object_ref": { "type": ["string", "null"] },
+        "sha256": { "anyOf": [{ "type": "string", "pattern": "^[a-f0-9]{64}$" }, { "type": "null" }] },
+        "permission_reference_id": { "anyOf": [{ "$ref": "#/$defs/Id" }, { "type": "null" }] }
+      }
+    },
+    "Answer": {
+      "type": "object", "additionalProperties": false, "required": ["status", "value"],
+      "properties": {
+        "status": { "enum": ["answered", "unknown", "declined", "unknown_or_declined", "not_applicable", "not_collected"] },
+        "value": { "type": ["string", "integer", "boolean", "array", "null"], "items": { "type": "string" } },
+        "note": { "type": ["string", "null"] }
+      },
+      "allOf": [
+        { "if": { "properties": { "status": { "const": "answered" } } }, "then": { "properties": { "value": { "not": { "type": "null" } } } }, "else": { "properties": { "value": { "type": "null" } } } }
+      ]
+    },
+    "CountAnswer": {
+      "allOf": [{ "$ref": "#/$defs/Answer" }, { "properties": { "value": { "type": ["integer", "null"], "minimum": 0 } } }]
+    },
+    "BooleanAnswer": {
+      "allOf": [{ "$ref": "#/$defs/Answer" }, { "properties": { "value": { "type": ["boolean", "null"] } } }]
+    },
+    "TextAnswer": {
+      "allOf": [{ "$ref": "#/$defs/Answer" }, { "properties": { "value": { "type": ["string", "null"] } } }]
+    },
+    "SurveyAnswers": {
+      "type": "object", "additionalProperties": false,
+      "required": ["H01", "H03", "H04", "G01", "K01", "K03", "K05", "K06", "K08", "K09", "K10", "E01", "D07", "O01"],
+      "properties": {
+        "H01": { "$ref": "#/$defs/CountAnswer", "description": "Son dört haftada haftada ortalama en az dört gece kalan kişi sayısı; geçici misafir hariç." },
+        "H03": { "allOf": [{ "$ref": "#/$defs/CountAnswer" }, { "properties": { "value": { "maximum": 30 } } }], "description": "Normal hafta içi 09:00-18:00 arasında evde bulunan kişi sayısı." },
+        "H04": { "allOf": [{ "$ref": "#/$defs/TextAnswer" }, { "properties": { "value": { "enum": ["year_round", "seasonal", null] } } }], "description": "Dönemsel kullanımın ayları biliniyorsa note içinde kaynak ifadesi korunur." },
+        "G01": { "allOf": [{ "$ref": "#/$defs/TextAnswer" }, { "properties": { "value": { "enum": ["no_regular_income", "up_to_1_net_minimum_wage", "above_1_up_to_2", "above_2_up_to_3", "above_3", null] } } }], "description": "Güncel anketin gelir bandı; kesin TL tutarı değildir. Yanıtlamak istemiyor: status=declined, value=null." },
+        "K01": { "allOf": [{ "$ref": "#/$defs/TextAnswer" }, { "properties": { "value": { "enum": ["apartment", "detached", "semi_detached_or_terraced", "lodging", "other", null] } } }] },
+        "K03": { "allOf": [{ "$ref": "#/$defs/TextAnswer" }, { "properties": { "value": { "enum": ["up_to_75_m2", "76_to_100_m2", "101_to_150_m2", "151_m2_or_more", null] } } }], "description": "Net iç alan bandı. Kaynaktaki bilmiyor veya yanıtlamak istemiyor için unknown_or_declined." },
+        "K05": { "$ref": "#/$defs/BooleanAnswer", "description": "Haneye ait özel bahçe/sulanan açık alan; ortak site peyzajı hariç." },
+        "K06": { "$ref": "#/$defs/BooleanAnswer", "description": "Bahçe suyunun izlenen sayaçtan gelmesi; K05 false ise not_applicable." },
+        "K08": { "$ref": "#/$defs/BooleanAnswer", "description": "İzlenen sayacın yalnız bu haneyi ölçmesi; teknik kapsam doğrulamasının yerine geçmez." },
+        "K09": { "allOf": [{ "$ref": "#/$defs/TextAnswer" }, { "properties": { "value": { "enum": ["none", "well", "rainwater", "tanker", "shared_tank", "other", null] } } }] },
+        "K10": { "$ref": "#/$defs/BooleanAnswer", "description": "Konut/binada su deposu bulunması." },
+        "E01": { "allOf": [{ "$ref": "#/$defs/Answer" }, { "properties": { "value": { "anyOf": [{ "type": "array", "uniqueItems": true, "minItems": 1, "items": { "enum": ["washing_machine", "dishwasher", "water_purifier", "none"] }, "allOf": [{ "if": { "contains": { "const": "none" } }, "then": { "maxItems": 1 } }] }, { "type": "null" }] } } }], "description": "Çoklu seçim. Cihaz kullanım sıklığı toplanmış bir alan değildir." },
+        "D07": { "allOf": [{ "$ref": "#/$defs/TextAnswer" }, { "properties": { "value": { "enum": ["no", "yes_repaired", "yes_ongoing", null] } } }], "description": "Son 30 güne ilişkin katılımcı kaçak/akan armatür bildirimi; varsa yaklaşık tarih note içinde." },
+        "O01": { "$ref": "#/$defs/BooleanAnswer", "description": "Misafir, boş kalma, tadilat, sayaç değişimi vb.; açıklama/tarih note içinde, gerekirse ayrı household_events kaydına referans." }
+      },
+      "allOf": [
+        { "if": { "properties": { "K05": { "properties": { "status": { "const": "answered" }, "value": { "const": false } } } } }, "then": { "properties": { "K06": { "properties": { "status": { "const": "not_applicable" }, "value": { "type": "null" } } } } } }
+      ]
+    },
+    "InstitutionalHouseholdProfile": {
+      "type": "object", "additionalProperties": false, "required": ["profile_id", "source_ref"],
+      "properties": {
+        "profile_id": { "$ref": "#/$defs/Id" }, "source_ref": { "$ref": "#/$defs/SourceRef" },
+        "area_id": { "anyOf": [{ "$ref": "#/$defs/Id" }, { "type": "null" }] },
+        "home_category": { "$ref": "#/$defs/TextAnswer", "description": "Kaynak EV KATAGORİSİ değeri; konut fiziksel türünden ayrı." },
+        "dwelling_type": { "$ref": "#/$defs/TextAnswer", "description": "Özgün KONUT TİPİ değeri; site/bahçeli/dubleks otomatik fiziksel türe çevrilmez." },
+        "household_size": { "allOf": [{ "$ref": "#/$defs/Answer" }, { "properties": { "value": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "const": "8+" }, { "type": "null" }] } } }] },
+        "pets_category": { "$ref": "#/$defs/TextAnswer" },
+        "income_category": { "$ref": "#/$defs/TextAnswer", "description": "Özgün kurumsal gelir sınıfı. Yeni anket G01 bandıyla aynı değişken/sözlük kabul edilmez." }
+      }
+    },
+    "MemberProfile": {
+      "type": "object", "additionalProperties": false, "required": ["member_id", "source_ref"],
+      "properties": {
+        "member_id": { "$ref": "#/$defs/Id" }, "source_ref": { "$ref": "#/$defs/SourceRef" },
+        "sex_gender_category": { "$ref": "#/$defs/TextAnswer", "description": "Kaynak CİNSİYET kategorisi; tanımı kaynak sözlüğünde korunur." },
+        "age_band": { "$ref": "#/$defs/TextAnswer", "description": "Kaynak yaş grubu; kesin yaş veya doğum tarihi türetilmez." },
+        "marital_status": { "$ref": "#/$defs/TextAnswer" },
+        "education_category": { "$ref": "#/$defs/TextAnswer" },
+        "activity_category": { "$ref": "#/$defs/TextAnswer", "description": "Kaynak faaliyet/çalışma durumu." }
+      }
+    },
+    "Household": {
+      "type": "object", "additionalProperties": false, "required": ["household_id"],
+      "properties": {
+        "household_id": { "$ref": "#/$defs/Id", "description": "Araştırma HANE_ID kodu." },
+        "institutional_profiles": { "type": "array", "items": { "$ref": "#/$defs/InstitutionalHouseholdProfile" } },
+        "member_profiles": { "type": "array", "items": { "$ref": "#/$defs/MemberProfile" } }
+      }
+    },
+    "Area": {
+      "type": "object", "additionalProperties": false, "required": ["area_id", "level", "parent_area_id"],
+      "properties": { "area_id": { "$ref": "#/$defs/Id" }, "level": { "enum": ["province", "district", "neighborhood"] }, "parent_area_id": { "anyOf": [{ "$ref": "#/$defs/Id" }, { "type": "null" }] }, "label": { "type": "string" } }
+    },
+    "Cohort": {
+      "type": "object", "additionalProperties": false, "required": ["cohort_id"],
+      "properties": { "cohort_id": { "$ref": "#/$defs/Id" }, "label": { "type": "string" } }
+    },
+    "Membership": {
+      "type": "object", "additionalProperties": false, "required": ["household_id", "cohort_id", "validity", "source_ref"],
+      "properties": { "household_id": { "$ref": "#/$defs/Id" }, "cohort_id": { "$ref": "#/$defs/Id" }, "validity": { "$ref": "#/$defs/Validity" }, "source_ref": { "$ref": "#/$defs/SourceRef" } }
+    },
+    "HouseholdLink": {
+      "type": "object", "additionalProperties": false, "required": ["household_id", "scope", "validity", "source_ref"],
+      "properties": { "household_id": { "$ref": "#/$defs/Id" }, "scope": { "enum": ["exclusive", "shared", "unknown"] }, "validity": { "$ref": "#/$defs/Validity" }, "source_ref": { "$ref": "#/$defs/SourceRef" } }
+    },
+    "MeasurementPoint": {
+      "type": "object", "additionalProperties": false, "required": ["measurement_point_id", "household_links"],
+      "properties": { "measurement_point_id": { "$ref": "#/$defs/Id" }, "household_links": { "type": "array", "items": { "$ref": "#/$defs/HouseholdLink" } } }
+    },
+    "Subscription": {
+      "type": "object", "additionalProperties": false, "required": ["subscription_id", "measurement_point_id", "validity", "source_ref"],
+      "properties": { "subscription_id": { "$ref": "#/$defs/Id" }, "measurement_point_id": { "$ref": "#/$defs/Id" }, "validity": { "$ref": "#/$defs/Validity" }, "source_ref": { "$ref": "#/$defs/SourceRef" } },
+      "description": "Yalnız kodlanmış araştırma aboneliği. Sağlayıcının gerçek abone numarası veya kimlik eşleştirme anahtarı bu nesnede bulunmaz."
+    },
+    "Configuration": {
+      "type": "object", "additionalProperties": false, "required": ["configuration_id", "version", "validity", "liters_per_pulse", "source_ref"],
+      "properties": { "configuration_id": { "$ref": "#/$defs/Id" }, "version": { "type": "integer", "minimum": 1 }, "validity": { "$ref": "#/$defs/Validity" }, "liters_per_pulse": { "anyOf": [{ "$ref": "#/$defs/Volume" }, { "type": "null" }] }, "timestamp_resolution_ms": { "type": ["integer", "null"], "minimum": 1 }, "source_ref": { "$ref": "#/$defs/SourceRef" } },
+      "description": "Pulse akışında katsayı pozitif olmalıdır; interval/index için null. Konfigürasyon geçerliliğinin bitişi açık olabilir."
+    },
+    "Validity": {
+      "type": "object", "additionalProperties": false, "required": ["start", "end"],
+      "properties": { "start": { "$ref": "#/$defs/Timestamp" }, "end": { "anyOf": [{ "$ref": "#/$defs/Timestamp" }, { "type": "null" }] } },
+      "description": "Bitişi açık olabilen geçerlilik dönemi; end=null devam ediyor anlamındadır."
+    },
+    "Stream": {
+      "type": "object", "additionalProperties": false, "required": ["stream_code", "kind", "configurations"],
+      "properties": { "stream_code": { "$ref": "#/$defs/Id" }, "kind": { "enum": ["pulse", "interval", "index"] }, "configurations": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/Configuration" } } },
+      "allOf": [{ "if": { "properties": { "kind": { "const": "pulse" } } }, "then": { "properties": { "configurations": { "items": { "properties": { "liters_per_pulse": { "allOf": [{ "$ref": "#/$defs/Volume" }, { "not": { "pattern": "^0(?:\\.0+)?$" } }] } } } } } }, "else": { "properties": { "configurations": { "items": { "properties": { "liters_per_pulse": { "type": "null" } } } } } } }]
+    },
+    "Meter": {
+      "type": "object", "additionalProperties": false, "required": ["meter_id", "streams"],
+      "properties": { "meter_id": { "$ref": "#/$defs/Id" }, "technology": { "enum": ["velocity", "volumetric", "ultrasonic", "other", "unknown"] }, "model_code": { "type": ["string", "null"] }, "streams": { "type": "array", "items": { "$ref": "#/$defs/Stream" } } }
+    },
+    "Installation": {
+      "type": "object", "additionalProperties": false, "required": ["installation_id", "meter_id", "measurement_point_id", "validity", "source_ref"],
+      "properties": { "installation_id": { "$ref": "#/$defs/Id" }, "meter_id": { "$ref": "#/$defs/Id" }, "measurement_point_id": { "$ref": "#/$defs/Id" }, "validity": { "$ref": "#/$defs/Validity" }, "source_ref": { "$ref": "#/$defs/SourceRef" } }
+    },
+    "SurveyResponse": {
+      "type": "object", "additionalProperties": false,
+      "required": ["survey_id", "household_id", "questionnaire_version", "collection_date", "collection_method", "participation_consent", "installation_consent", "answers", "source_ref"],
+      "properties": {
+        "survey_id": { "$ref": "#/$defs/Id" }, "household_id": { "$ref": "#/$defs/Id" },
+        "questionnaire_version": { "type": "string", "minLength": 1 },
+        "collection_date": { "anyOf": [{ "$ref": "#/$defs/Date" }, { "type": "null" }], "description": "ADM03; kaynakta yalnız gün biliniyorsa saat uydurulmaz." },
+        "collection_method": { "enum": ["face_to_face", "phone", "self_completed", "unknown"], "description": "ADM04." },
+        "participation_consent": { "$ref": "#/$defs/BooleanAnswer", "description": "RZ01." },
+        "installation_consent": { "$ref": "#/$defs/BooleanAnswer", "description": "RZ02." },
+        "answers": { "$ref": "#/$defs/SurveyAnswers" },
+        "source_ref": { "$ref": "#/$defs/SourceRef" }
+      },
+      "description": "ADM01 household_id'dir. ADM02 gerçek abone anahtarı kurumda tutulur; analiz paketine kopyalanmaz."
+    },
+    "HouseholdEvent": {
+      "type": "object", "additionalProperties": false, "required": ["event_id", "household_id", "event_type", "reported_start", "reported_end", "date_precision", "evidence_type", "source_ref"],
+      "properties": {
+        "event_id": { "$ref": "#/$defs/Id" }, "household_id": { "$ref": "#/$defs/Id" },
+        "event_type": { "enum": ["guest", "vacancy", "renovation", "meter_change", "reported_leak", "repair", "other"] },
+        "reported_start": { "type": ["string", "null"] }, "reported_end": { "type": ["string", "null"] },
+        "date_precision": { "enum": ["timestamp", "date", "month", "approximate", "unknown"] },
+        "evidence_type": { "enum": ["self_report", "institutional_record", "expert_confirmed"] },
+        "survey_id": { "anyOf": [{ "$ref": "#/$defs/Id" }, { "type": "null" }] },
+        "source_ref": { "$ref": "#/$defs/SourceRef" }
+      }
+    },
+    "MeterMeasurement": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_id", "stream_code", "event_id", "revision", "kind", "occurred_at", "received_at", "interval_start", "value", "unit"],
+      "properties": {
+        "source_id": { "$ref": "#/$defs/Id" }, "stream_code": { "$ref": "#/$defs/Id" }, "event_id": { "$ref": "#/$defs/Id" },
+        "revision": { "type": "integer", "minimum": 1 }, "kind": { "enum": ["pulse", "interval", "index"] },
+        "occurred_at": { "$ref": "#/$defs/Timestamp" }, "received_at": { "$ref": "#/$defs/Timestamp" },
+        "interval_start": { "anyOf": [{ "$ref": "#/$defs/Timestamp" }, { "type": "null" }] },
+        "value": { "$ref": "#/$defs/Volume" }, "unit": { "enum": ["pulse", "L", "m3"] },
+        "configuration_id": { "$ref": "#/$defs/Id", "description": "Verilmemişse doğrulanmış registry'den çözülür; verilmişse ayrıca doğrulanır." }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "interval" } } }, "then": { "properties": { "interval_start": { "$ref": "#/$defs/Timestamp" }, "unit": { "enum": ["L", "m3"] } } }, "else": { "properties": { "interval_start": { "type": "null" } } } },
+        { "if": { "properties": { "kind": { "const": "pulse" } } }, "then": { "properties": { "unit": { "const": "pulse" }, "value": { "type": "string", "pattern": "^(?:0|[1-9][0-9]*)$" } } }, "else": { "properties": { "unit": { "enum": ["L", "m3"] } } } }
+      ],
+      "description": "Kaynak değeri/birimi korunur. Hacim normalizasyonu ve hane ataması sistem çıktısıdır. Mevcut JSONL adaptöründen ayrı öneri paket kaydıdır."
+    },
+    "DeviceStatus": {
+      "type": "object", "additionalProperties": false, "required": ["stream_code", "occurred_at", "status", "source_ref"],
+      "properties": { "stream_code": { "$ref": "#/$defs/Id" }, "occurred_at": { "$ref": "#/$defs/Timestamp" }, "status": { "enum": ["heartbeat", "online", "offline", "fault", "unknown"] }, "source_ref": { "$ref": "#/$defs/SourceRef" } }
+    },
+    "MonthlyConsumption": {
+      "type": "object", "additionalProperties": false, "required": ["record_id", "subscription_id", "period", "value", "unit", "reading_basis", "source_ref"],
+      "properties": { "record_id": { "$ref": "#/$defs/Id" }, "subscription_id": { "$ref": "#/$defs/Id" }, "period": { "$ref": "#/$defs/Period" }, "value": { "$ref": "#/$defs/Volume" }, "unit": { "enum": ["L", "m3"] }, "reading_basis": { "enum": ["measured", "estimated", "corrected", "unknown"] }, "source_ref": { "$ref": "#/$defs/SourceRef" } },
+      "description": "Dönem gerçek okuma/faturalama dönemidir; otomatik takvim ayı sayılmaz. Bu kayıtla sayaç pulse hacmi birlikte toplanmaz."
+    },
+    "AreaConsumption": {
+      "type": "object", "additionalProperties": false, "required": ["record_id", "area_id", "period", "value", "unit", "population_scope", "source_ref"],
+      "properties": { "record_id": { "$ref": "#/$defs/Id" }, "area_id": { "$ref": "#/$defs/Id" }, "period": { "$ref": "#/$defs/Period" }, "value": { "$ref": "#/$defs/Volume" }, "unit": { "enum": ["L", "m3"] }, "population_scope": { "enum": ["all_domestic", "pilot_households", "all_subscriptions", "other", "unknown"] }, "source_ref": { "$ref": "#/$defs/SourceRef" } }
+    },
+    "Weather": {
+      "type": "object", "additionalProperties": false, "required": ["area_id", "period", "kind", "issued_at", "variables", "source_ref"],
+      "properties": {
+        "area_id": { "$ref": "#/$defs/Id" }, "period": { "$ref": "#/$defs/Period" },
+        "kind": { "enum": ["observed", "forecast", "scenario"] },
+        "issued_at": { "anyOf": [{ "$ref": "#/$defs/Timestamp" }, { "type": "null" }] },
+        "variables": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["name", "value", "unit", "aggregation"], "properties": { "name": { "enum": ["temperature", "precipitation", "drought_index"] }, "value": { "anyOf": [{ "$ref": "#/$defs/Decimal" }, { "type": "null" }] }, "unit": { "type": "string" }, "aggregation": { "enum": ["mean", "minimum", "maximum", "sum", "index"] } } } },
+        "source_ref": { "$ref": "#/$defs/SourceRef" }
+      },
+      "allOf": [{ "if": { "properties": { "kind": { "const": "forecast" } } }, "then": { "properties": { "issued_at": { "$ref": "#/$defs/Timestamp" } } } }]
+    },
+    "MeterErrorCurve": {
+      "type": "object", "additionalProperties": false, "required": ["curve_id", "technology", "model_code", "basis", "points", "source_ref"],
+      "properties": {
+        "curve_id": { "$ref": "#/$defs/Id" }, "technology": { "type": "string" }, "model_code": { "type": ["string", "null"] },
+        "basis": { "enum": ["validated_reference", "assumed_scenario"] },
+        "flow_basis": { "enum": ["reference", "measured", "unknown"], "description": "Debi ekseninin temeli. Verilmezse bilinmiyor kabul edilir; ölçülen debi referans debi yerine sessizce kullanılmaz." },
+        "error_definition": { "enum": ["relative_to_reference", "other", "unknown"], "description": "relative_to_reference: yüzde hata 100*(V_olculen-V_referans)/V_referans. Verilmeyen tanım uydurulmaz." },
+        "validity_notes": { "type": ["string", "null"] },
+        "points": { "type": "array", "minItems": 1, "items": { "type": "object", "additionalProperties": false, "required": ["flow_liters_per_hour", "signed_error_percent"], "properties": { "flow_liters_per_hour": { "$ref": "#/$defs/Volume" }, "signed_error_percent": { "$ref": "#/$defs/Decimal" } } } },
+        "source_ref": { "$ref": "#/$defs/SourceRef" }
+      }
+    },
+    "InputPackage": {
+      "type": "object", "additionalProperties": false, "required": ["meta", "sources", "registry", "observations"],
+      "properties": {
+        "meta": {
+          "type": "object", "additionalProperties": false, "required": ["contract_version", "package_type", "package_id", "study_id", "created_at", "environment"],
+          "properties": { "contract_version": { "const": "urban-water.research.v0.1" }, "package_type": { "const": "input" }, "package_id": { "$ref": "#/$defs/Id" }, "study_id": { "$ref": "#/$defs/Id" }, "created_at": { "$ref": "#/$defs/Timestamp" }, "environment": { "enum": ["synthetic", "institutional"] } }
+        },
+        "sources": { "type": "array", "items": { "$ref": "#/$defs/Source" } },
+        "registry": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "areas": { "type": "array", "items": { "$ref": "#/$defs/Area" } },
+            "households": { "type": "array", "items": { "$ref": "#/$defs/Household" } },
+            "cohorts": { "type": "array", "items": { "$ref": "#/$defs/Cohort" } },
+            "memberships": { "type": "array", "items": { "$ref": "#/$defs/Membership" } },
+            "measurement_points": { "type": "array", "items": { "$ref": "#/$defs/MeasurementPoint" } },
+            "subscriptions": { "type": "array", "items": { "$ref": "#/$defs/Subscription" } },
+            "meters": { "type": "array", "items": { "$ref": "#/$defs/Meter" } },
+            "installations": { "type": "array", "items": { "$ref": "#/$defs/Installation" } }
+          }
+        },
+        "observations": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "survey_responses": { "type": "array", "items": { "$ref": "#/$defs/SurveyResponse" } },
+            "household_events": { "type": "array", "items": { "$ref": "#/$defs/HouseholdEvent" } },
+            "meter_measurements": { "type": "array", "items": { "$ref": "#/$defs/MeterMeasurement" } },
+            "device_status": { "type": "array", "items": { "$ref": "#/$defs/DeviceStatus" } },
+            "monthly_consumption": { "type": "array", "items": { "$ref": "#/$defs/MonthlyConsumption" } },
+            "area_consumption": { "type": "array", "items": { "$ref": "#/$defs/AreaConsumption" } },
+            "weather": { "type": "array", "items": { "$ref": "#/$defs/Weather" } },
+            "meter_error_curves": { "type": "array", "items": { "$ref": "#/$defs/MeterErrorCurve" } }
+          }
+        }
+      }
+    },
+    "Target": {
+      "type": "object", "additionalProperties": false, "required": ["type", "id"],
+      "properties": { "type": { "enum": ["household", "measurement_point", "area", "meter"] }, "id": { "$ref": "#/$defs/Id" } }
+    },
+    "Artifact": {
+      "type": "object", "additionalProperties": false, "required": ["artifact_id", "role", "format", "object_ref", "sha256", "row_count"],
+      "properties": { "artifact_id": { "$ref": "#/$defs/Id" }, "role": { "type": "string" }, "format": { "enum": ["parquet", "json", "jsonl"] }, "object_ref": { "type": "string" }, "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "row_count": { "type": ["integer", "null"], "minimum": 0 } }
+    },
+    "QualityReport": {
+      "type": "object", "additionalProperties": false, "required": ["summary", "issues"],
+      "properties": {
+        "summary": { "type": "object", "additionalProperties": false, "required": ["input_records", "accepted_records", "duplicate_records", "quarantined_records", "unresolved_records"], "properties": { "input_records": { "type": "integer", "minimum": 0 }, "accepted_records": { "type": "integer", "minimum": 0 }, "duplicate_records": { "type": "integer", "minimum": 0 }, "quarantined_records": { "type": "integer", "minimum": 0 }, "unresolved_records": { "type": "integer", "minimum": 0 } } },
+        "issues": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["code", "severity", "source_id", "record_ref"], "properties": { "code": { "type": "string" }, "severity": { "enum": ["info", "warning", "error"] }, "source_id": { "anyOf": [{ "$ref": "#/$defs/Id" }, { "type": "null" }] }, "record_ref": { "type": ["string", "null"] } } } }
+      }
+    },
+    "ResultStatus": { "enum": ["ready", "partial", "insufficient_data", "not_applicable", "not_requested", "failed"] },
+    "ResultSet": {
+      "type": "object", "additionalProperties": false, "required": ["status", "reason_codes", "records"],
+      "properties": { "status": { "$ref": "#/$defs/ResultStatus" }, "reason_codes": { "type": "array", "items": { "type": "string" } }, "records": { "type": "array" } },
+      "allOf": [{ "if": { "properties": { "status": { "enum": ["insufficient_data", "not_applicable", "not_requested", "failed"] } } }, "then": { "properties": { "records": { "maxItems": 0 } } } }],
+      "description": "Her analiz ailesinin çalışma durumu ayrıdır. ready + boş anomalies listesi, analiz yapıldı ve aday bulunmadı demektir. not_requested + boş liste, analiz istenmedi demektir."
+    },
+    "VolumeSummary": {
+      "type": "object", "additionalProperties": false, "required": ["target", "period", "grain", "observed_liters", "coverage_status", "status"],
+      "properties": { "target": { "$ref": "#/$defs/Target" }, "period": { "$ref": "#/$defs/Period" }, "grain": { "enum": ["hour", "day", "week", "month"] }, "observed_liters": { "anyOf": [{ "$ref": "#/$defs/Volume" }, { "type": "null" }] }, "coverage_status": { "enum": ["complete", "partial", "unknown"] }, "status": { "$ref": "#/$defs/ResultStatus" } },
+      "allOf": [{ "if": { "properties": { "status": { "enum": ["ready", "partial"] } } }, "then": { "properties": { "observed_liters": { "$ref": "#/$defs/Volume" } } }, "else": { "properties": { "observed_liters": { "type": "null" } } } }]
+    },
+    "ProfileResult": {
+      "type": "object", "additionalProperties": false, "required": ["profile_result_id", "target", "period", "model_version", "profile_label", "status"],
+      "properties": { "profile_result_id": { "$ref": "#/$defs/Id" }, "target": { "$ref": "#/$defs/Target" }, "period": { "$ref": "#/$defs/Period" }, "model_version": { "type": ["string", "null"] }, "profile_label": { "type": ["string", "null"] }, "status": { "$ref": "#/$defs/ResultStatus" } },
+      "allOf": [{ "if": { "properties": { "status": { "enum": ["ready", "partial"] } } }, "then": { "properties": { "model_version": { "type": "string", "minLength": 1 }, "profile_label": { "type": "string", "minLength": 1 } } }, "else": { "properties": { "profile_label": { "type": "null" } } } }]
+    },
+    "Forecast": {
+      "type": "object", "additionalProperties": false, "required": ["prediction_id", "target", "issued_at", "target_period", "horizon_type", "model_version", "predicted_liters", "lower_liters", "upper_liters", "status"],
+      "properties": { "prediction_id": { "$ref": "#/$defs/Id" }, "target": { "$ref": "#/$defs/Target" }, "issued_at": { "$ref": "#/$defs/Timestamp" }, "target_period": { "$ref": "#/$defs/Period" }, "horizon_type": { "enum": ["next_calendar_day", "next_24h_hourly", "regional_period"] }, "model_version": { "type": ["string", "null"] }, "predicted_liters": { "anyOf": [{ "$ref": "#/$defs/Volume" }, { "type": "null" }] }, "lower_liters": { "anyOf": [{ "$ref": "#/$defs/Volume" }, { "type": "null" }] }, "upper_liters": { "anyOf": [{ "$ref": "#/$defs/Volume" }, { "type": "null" }] }, "status": { "$ref": "#/$defs/ResultStatus" } },
+      "description": "Saatlik hedefte her kayıt bir saatlik aralıktır; 24 saatlik koşum kimliği Output.meta.run_id'dir. Günlük hedef yerel takvim günüdür. regional_period bağımsız bölge serisiyle aynı hedef dönemi içindir; aylık veriden günlük gerçek türetilmez.",
+      "allOf": [
+        { "if": { "properties": { "status": { "enum": ["ready", "partial"] } } }, "then": { "properties": { "predicted_liters": { "$ref": "#/$defs/Volume" }, "model_version": { "type": "string", "minLength": 1 } } }, "else": { "properties": { "predicted_liters": { "type": "null" }, "lower_liters": { "type": "null" }, "upper_liters": { "type": "null" } } } },
+        { "if": { "properties": { "horizon_type": { "const": "regional_period" } } }, "then": { "properties": { "target": { "properties": { "type": { "const": "area" } } } } } }
+      ]
+    },
+    "Anomaly": {
+      "type": "object", "additionalProperties": false, "required": ["anomaly_id", "target", "period", "candidate_type", "model_version", "score", "score_method", "score_direction", "verification_state", "evidence_refs", "status"],
+      "properties": { "anomaly_id": { "$ref": "#/$defs/Id" }, "target": { "$ref": "#/$defs/Target" }, "period": { "$ref": "#/$defs/Period" }, "candidate_type": { "type": "string", "minLength": 1 }, "model_version": { "type": ["string", "null"] }, "score": { "anyOf": [{ "$ref": "#/$defs/Decimal" }, { "type": "null" }] }, "score_method": { "type": ["string", "null"], "description": "Skorun yöntemi/ölçeği; örneğin negatif score_samples. Skor olasılık kabul edilmez." }, "score_direction": { "enum": ["higher_is_more_anomalous", "lower_is_more_anomalous", null] }, "verification_state": { "enum": ["unreviewed", "confirmed", "rejected"] }, "evidence_refs": { "type": "array", "items": { "$ref": "#/$defs/Id" } }, "status": { "$ref": "#/$defs/ResultStatus" } },
+      "allOf": [
+        { "if": { "properties": { "status": { "enum": ["ready", "partial"] } } }, "then": { "properties": { "score": { "$ref": "#/$defs/Decimal" }, "score_method": { "type": "string", "minLength": 1 }, "score_direction": { "enum": ["higher_is_more_anomalous", "lower_is_more_anomalous"] }, "model_version": { "type": "string", "minLength": 1 } } }, "else": { "properties": { "score": { "type": "null" } } } },
+        { "if": { "properties": { "verification_state": { "const": "confirmed" } } }, "then": { "properties": { "evidence_refs": { "minItems": 1 } } } }
+      ]
+    },
+    "MeterPerformance": {
+      "type": "object", "additionalProperties": false, "required": ["performance_id", "target", "period", "curve_id", "basis", "weighted_signed_error_percent", "status"],
+      "properties": { "performance_id": { "$ref": "#/$defs/Id" }, "target": { "$ref": "#/$defs/Target" }, "period": { "$ref": "#/$defs/Period" }, "curve_id": { "anyOf": [{ "$ref": "#/$defs/Id" }, { "type": "null" }] }, "basis": { "enum": ["reference_measurement", "validated_curve", "assumed_scenario", "unavailable"] }, "volume_basis": { "enum": ["reference", "measured_reconstructed", "unknown"] }, "error_definition": { "enum": ["relative_to_reference", "unknown"] }, "covered_reference_volume_liters": { "anyOf": [{ "$ref": "#/$defs/Volume" }, { "type": "null" }] }, "excluded_volume_liters": { "anyOf": [{ "$ref": "#/$defs/Volume" }, { "type": "null" }] }, "reason_codes": { "type": "array", "items": { "type": "string" } }, "weighted_signed_error_percent": { "anyOf": [{ "$ref": "#/$defs/Decimal" }, { "type": "null" }] }, "status": { "$ref": "#/$defs/ResultStatus" } },
+      "allOf": [
+        { "if": { "properties": { "status": { "enum": ["ready", "partial"] } } }, "then": { "required": ["volume_basis", "error_definition"], "properties": { "weighted_signed_error_percent": { "$ref": "#/$defs/Decimal" }, "volume_basis": { "enum": ["reference", "measured_reconstructed"] }, "error_definition": { "const": "relative_to_reference" }, "basis": { "enum": ["reference_measurement", "validated_curve", "assumed_scenario"] } } }, "else": { "properties": { "weighted_signed_error_percent": { "type": "null" } } } },
+        { "if": { "properties": { "status": { "enum": ["ready", "partial"] }, "basis": { "enum": ["validated_curve", "assumed_scenario"] } } }, "then": { "properties": { "curve_id": { "$ref": "#/$defs/Id" } } } }
+      ]
+    },
+    "Explanation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["explanation_id", "result_type", "result_id", "method", "explainer_version", "feature_set_version", "unit", "base_value", "model_output", "contributions", "reason_codes", "status"],
+      "properties": {
+        "explanation_id": { "$ref": "#/$defs/Id" },
+        "result_type": { "enum": ["profile", "forecast", "anomaly", "meter_performance", "decision"] },
+        "result_id": { "$ref": "#/$defs/Id", "description": "Sırasıyla profile_result_id, prediction_id, anomaly_id, performance_id veya decision_id." },
+        "method": { "enum": ["shap", "lime", "rule_trace", "other"] },
+        "explainer_version": { "type": "string" },
+        "feature_set_version": { "type": ["string", "null"] },
+        "unit": { "type": "string", "description": "Katkı ölçeği: örneğin L, score veya log_odds. Doğrudan nedensel etki olarak yorumlanmaz." },
+        "base_value": { "anyOf": [{ "$ref": "#/$defs/Decimal" }, { "type": "null" }] },
+        "model_output": { "anyOf": [{ "$ref": "#/$defs/Decimal" }, { "type": "null" }] },
+        "contributions": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["feature", "input_value", "signed_contribution"], "properties": { "feature": { "type": "string" }, "input_value": { "type": ["string", "integer", "boolean", "null"] }, "signed_contribution": { "anyOf": [{ "$ref": "#/$defs/Decimal" }, { "type": "null" }] } } } },
+        "reason_codes": { "type": "array", "items": { "type": "string" } },
+        "status": { "$ref": "#/$defs/ResultStatus" }
+      }
+    },
+    "Decision": {
+      "type": "object", "additionalProperties": false, "required": ["decision_id", "target", "at", "rule_set_version", "from_state", "to_state", "evidence_refs", "reason_codes", "status"],
+      "properties": { "decision_id": { "$ref": "#/$defs/Id" }, "target": { "$ref": "#/$defs/Target" }, "at": { "$ref": "#/$defs/Timestamp" }, "rule_set_version": { "type": "string" }, "from_state": { "type": ["string", "null"] }, "to_state": { "type": ["string", "null"] }, "evidence_refs": { "type": "array", "items": { "$ref": "#/$defs/Id" } }, "reason_codes": { "type": "array", "items": { "type": "string" } }, "status": { "$ref": "#/$defs/ResultStatus" } }
+    },
+    "Evaluation": {
+      "type": "object", "additionalProperties": false, "required": ["experiment_id", "split_id", "task", "horizon_type", "metrics", "sample_counts", "status"],
+      "properties": {
+        "experiment_id": { "$ref": "#/$defs/Id" }, "split_id": { "$ref": "#/$defs/Id" },
+        "task": { "enum": ["profiling", "anomaly", "forecasting", "meter_performance", "execution_comparison"] },
+        "horizon_type": { "enum": ["next_calendar_day", "next_24h_hourly", "regional_period", null] },
+        "metrics": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["name", "value", "unit"], "properties": { "name": { "type": "string" }, "value": { "anyOf": [{ "$ref": "#/$defs/Decimal" }, { "type": "null" }] }, "unit": { "type": "string" } } } },
+        "sample_counts": { "type": "object", "additionalProperties": false, "required": ["eligible_households", "used_households", "eligible_periods", "used_periods"], "properties": { "eligible_households": { "type": "integer", "minimum": 0 }, "used_households": { "type": "integer", "minimum": 0 }, "eligible_periods": { "type": "integer", "minimum": 0 }, "used_periods": { "type": "integer", "minimum": 0 } } },
+        "status": { "$ref": "#/$defs/ResultStatus" }
+      },
+      "allOf": [
+        { "if": { "properties": { "task": { "const": "forecasting" } } }, "then": { "properties": { "horizon_type": { "enum": ["next_calendar_day", "next_24h_hourly", "regional_period"] } } }, "else": { "properties": { "horizon_type": { "type": "null" } } } },
+        { "if": { "properties": { "status": { "enum": ["insufficient_data", "not_applicable", "not_requested", "failed"] } } }, "then": { "properties": { "metrics": { "items": { "properties": { "value": { "type": "null" } } } } } } }
+      ]
+    },
+    "OutputPackage": {
+      "type": "object", "additionalProperties": false, "required": ["meta", "quality", "artifacts", "results"],
+      "properties": {
+        "meta": {
+          "type": "object", "additionalProperties": false,
+          "required": ["contract_version", "package_type", "package_id", "study_id", "cohort_id", "run_id", "input_package_ids", "dataset_id", "generated_at", "as_of", "timezone", "code_version", "environment", "status"],
+          "properties": { "contract_version": { "const": "urban-water.research.v0.1" }, "package_type": { "const": "output" }, "package_id": { "$ref": "#/$defs/Id" }, "study_id": { "$ref": "#/$defs/Id" }, "cohort_id": { "anyOf": [{ "$ref": "#/$defs/Id" }, { "type": "null" }] }, "run_id": { "$ref": "#/$defs/Id" }, "input_package_ids": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/Id" } }, "dataset_id": { "anyOf": [{ "$ref": "#/$defs/Id" }, { "type": "null" }] }, "generated_at": { "$ref": "#/$defs/Timestamp" }, "as_of": { "$ref": "#/$defs/Timestamp" }, "timezone": { "type": "string", "minLength": 1 }, "code_version": { "type": "string", "minLength": 1 }, "environment": { "enum": ["synthetic", "institutional"] }, "status": { "$ref": "#/$defs/ResultStatus" } }
+        },
+        "quality": { "$ref": "#/$defs/QualityReport" },
+        "artifacts": { "type": "array", "items": { "$ref": "#/$defs/Artifact" } },
+        "results": {
+          "type": "object", "additionalProperties": false,
+          "required": ["volume_summaries", "profiles", "forecasts", "anomalies", "meter_performance", "explanations", "decisions", "evaluation"],
+          "properties": {
+            "volume_summaries": { "allOf": [{ "$ref": "#/$defs/ResultSet" }, { "properties": { "records": { "items": { "$ref": "#/$defs/VolumeSummary" } } } }] },
+            "profiles": { "allOf": [{ "$ref": "#/$defs/ResultSet" }, { "properties": { "records": { "items": { "$ref": "#/$defs/ProfileResult" } } } }] },
+            "forecasts": { "allOf": [{ "$ref": "#/$defs/ResultSet" }, { "properties": { "records": { "items": { "$ref": "#/$defs/Forecast" } } } }] },
+            "anomalies": { "allOf": [{ "$ref": "#/$defs/ResultSet" }, { "properties": { "records": { "items": { "$ref": "#/$defs/Anomaly" } } } }] },
+            "meter_performance": { "allOf": [{ "$ref": "#/$defs/ResultSet" }, { "properties": { "records": { "items": { "$ref": "#/$defs/MeterPerformance" } } } }] },
+            "explanations": { "allOf": [{ "$ref": "#/$defs/ResultSet" }, { "properties": { "records": { "items": { "$ref": "#/$defs/Explanation" } } } }] },
+            "decisions": { "allOf": [{ "$ref": "#/$defs/ResultSet" }, { "properties": { "records": { "items": { "$ref": "#/$defs/Decision" } } } }] },
+            "evaluation": { "allOf": [{ "$ref": "#/$defs/ResultSet" }, { "properties": { "records": { "items": { "$ref": "#/$defs/Evaluation" } } } }] }
+          }
+        }
+      }
+    }
+  }
+}

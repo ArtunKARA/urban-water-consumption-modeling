@@ -1,22 +1,42 @@
 """Observed volume summaries; no fabricated coverage or within-interval allocation."""
 
 from collections import defaultdict
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from decimal import Decimal
+from functools import lru_cache
 from zoneinfo import ZoneInfo
 
 from urban_water.db import connect
 from urban_water.settings import Settings
+from urban_water.sources.registration import ensure_environment
+
+
+@lru_cache(maxsize=4096)
+def _day_start(day: date, zone: ZoneInfo) -> datetime:
+    """Earliest UTC boundary for a civil date; resolve midnight folds/gaps explicitly."""
+    naive = datetime.combine(day, time.min)
+    guesses = [naive.replace(tzinfo=zone, fold=fold).astimezone(UTC) for fold in (0, 1)]
+    valid = [g for g in guesses if g.astimezone(zone).replace(tzinfo=None) == naive]
+    if valid:
+        return min(valid)
+    # A skipped midnight/date has no exact wall-clock representation. Find the transition
+    # instead of normalizing to an arbitrary minute inside the new civil date.
+    low, high = sorted(guesses)
+    while high - low > timedelta(microseconds=1):
+        middle = low + (high - low) / 2
+        if middle.astimezone(zone).date() >= day:
+            high = middle
+        else:
+            low = middle
+    return high
 
 
 def _bucket(instant: datetime, grain: str, zone: ZoneInfo) -> tuple[datetime, datetime]:
     if grain == "hour":
         start = instant.astimezone(UTC).replace(minute=0, second=0, microsecond=0)
         return start, start + timedelta(hours=1)
-    local = instant.astimezone(zone)
-    start = local.replace(hour=0, minute=0, second=0, microsecond=0)
-    end = start + timedelta(days=1)
-    return start.astimezone(UTC), end.astimezone(UTC)
+    day = instant.astimezone(zone).date()
+    return _day_start(day, zone), _day_start(day + timedelta(days=1), zone)
 
 
 def summarize_connection(
@@ -25,6 +45,7 @@ def summarize_connection(
     timezone: str,
     study_code: str = "synthetic-pilot",
     cohort_code: str = "fixture",
+    collect_lineage: bool = False,
 ) -> dict:
     if grain not in {"hour", "day"}:
         raise ValueError("grain must be hour or day")
@@ -49,11 +70,29 @@ def summarize_connection(
     unallocated = Decimal(0)
     previous = {}
     input_observations = 0
+    if collect_lineage:
+        conn.execute(
+            "CREATE TEMP TABLE dataset_measurement "
+            "(measurement_id bigint PRIMARY KEY) ON COMMIT DROP"
+        )
+    lineage = []
     with conn.cursor(name="volume_summary") as cursor:
         cursor.itersize = 2000
-        cursor.execute("SELECT * FROM current_measurement ORDER BY stream_id,occurred_at,event_id")
+        cursor.execute(
+            """SELECT m.* FROM current_measurement m JOIN stream s ON s.id=m.stream_id
+            WHERE EXISTS (SELECT 1 FROM installation i JOIN membership p
+                ON p.household_id=i.household_id WHERE i.meter_id=s.meter_id
+                AND i.retired_at IS NULL AND p.cohort_id=%s)
+            ORDER BY m.stream_id,m.occurred_at,m.event_id""",
+            (cohort["id"],),
+        )
         for row in cursor:
             input_observations += 1
+            if collect_lineage:
+                lineage.append(row["id"])
+                if len(lineage) >= 2000:
+                    _write_lineage(conn, lineage)
+                    lineage = []
             end = row["occurred_at"]
             start = row["interval_start"]
             volume = row["liters"]
@@ -91,7 +130,7 @@ def summarize_connection(
                         member["valid_to"] >= end if start is not None else member["valid_to"] > end
                     )
                 )
-                for member in members[candidates[0]["household_id"]]
+                for member in members.get(candidates[0]["household_id"], ())
             )
             if not eligible:
                 diagnostics["outside_cohort"] += 1
@@ -106,6 +145,8 @@ def summarize_connection(
             counts[key] += 1
             if len(totals) > 1_000_000:
                 raise ValueError("summary bucket budget exceeded; narrow the extraction scope")
+    if lineage:
+        _write_lineage(conn, lineage)
     return {
         "grain": grain,
         "timezone": timezone,
@@ -134,9 +175,17 @@ def summarize_connection(
     }
 
 
+def _write_lineage(conn, ids: list[int]) -> None:
+    with conn.cursor() as cursor:
+        with cursor.copy("COPY dataset_measurement(measurement_id) FROM STDIN") as copy:
+            for measurement_id in ids:
+                copy.write_row((measurement_id,))
+
+
 def summarize(settings: Settings, grain: str = "day") -> dict:
     with connect(settings) as conn:
         conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
+        ensure_environment(conn, settings)
         return summarize_connection(
             conn,
             grain,

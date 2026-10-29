@@ -7,15 +7,17 @@ import json
 import os
 import shutil
 import subprocess
+from dataclasses import replace
 from pathlib import Path
 
 import psycopg
 from psycopg import sql
 from psycopg.conninfo import conninfo_to_dict
 
-from urban_water.datasets import file_sha
+from urban_water.datasets import file_sha, verify_dataset_files
 from urban_water.db import connect
 from urban_water.settings import Settings
+from urban_water.sources.registration import ensure_environment
 from urban_water.storage import FileStore
 
 
@@ -80,14 +82,20 @@ def create_backup(settings: Settings, destination: Path, pg_bin: Path | None = N
     objects = set()
     with connect(settings) as conn:
         conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
+        ensure_environment(conn, settings)
         snapshot = conn.execute("SELECT pg_export_snapshot() AS s").fetchone()["s"]
         counts = _counts(conn)
-        for row in conn.execute("SELECT object_key,sha256,byte_size FROM source"):
+        sources = list(conn.execute("SELECT object_key,sha256,byte_size FROM source"))
+        for row in sources:
             store.verify(row["object_key"], row["sha256"], row["byte_size"])
             objects.add(row["object_key"])
-        for row in conn.execute("SELECT object_key FROM dataset"):
+        datasets = list(conn.execute("SELECT * FROM dataset"))
+        for row in datasets:
+            verify_dataset_files(store, row)
             objects.add(row["object_key"])
             objects.add(str(Path(row["object_key"]).with_name("manifest.json")).replace("\\", "/"))
+            if normalization := row["manifest"].get("normalization"):
+                objects.add(normalization["object_key"])
         dump = destination / "database.dump"
         subprocess.run(
             [
@@ -110,9 +118,15 @@ def create_backup(settings: Settings, destination: Path, pg_bin: Path | None = N
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(store.path(key), target)
             hashes[f"objects/{key}"] = file_sha(target)
+        # Detect corruption during copying as well as corruption present before backup.
+        copied_store = FileStore(replace(settings, storage_root=destination / "objects"))
+        for row in sources:
+            copied_store.verify(row["object_key"], row["sha256"], row["byte_size"])
+        for row in datasets:
+            verify_dataset_files(copied_store, row)
         manifest = {
             "format": "urban-water.backup.v1",
-            "environment": "synthetic",
+            "environment": settings.environment,
             "database_name": conn.info.dbname,
             "counts": counts,
             "files": hashes,
@@ -126,6 +140,8 @@ def restore_backup(settings: Settings, backup: Path, pg_bin: Path | None = None)
     manifest = json.loads((backup / "manifest.json").read_text(encoding="utf-8"))
     if manifest.get("format") != "urban-water.backup.v1":
         raise ValueError("unknown backup format")
+    if manifest.get("environment") != settings.environment:
+        raise ValueError("backup environment must match the restore environment")
     config = conninfo_to_dict(settings.database_url)
     dbname = config.get("dbname", "")
     if not dbname.endswith(("_restore", "_test")) or dbname == manifest["database_name"]:
@@ -172,4 +188,6 @@ def restore_backup(settings: Settings, backup: Path, pg_bin: Path | None = None)
             raise ValueError("restored database counts differ from the snapshot")
         for row in conn.execute("SELECT object_key,sha256,byte_size FROM source"):
             FileStore(settings).verify(row["object_key"], row["sha256"], row["byte_size"])
+        for row in conn.execute("SELECT * FROM dataset"):
+            verify_dataset_files(FileStore(settings), row)
     return {"restored": True, "counts": counts, "storage_root": str(root)}

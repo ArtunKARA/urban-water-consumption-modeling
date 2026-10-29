@@ -46,7 +46,8 @@ def test_manifest_preserves_normalization_and_source_versions(settings, source_f
     work_once(settings)
     manifest = freeze(settings)
     stream = next(r for r in manifest["streams"] if r["code"] == "S0001-pulse")
-    assert stream["liters_per_pulse"] == "0.100000000"
+    config = next(r for r in manifest["configurations"] if r["stream_id"] == stream["id"])
+    assert config["liters_per_pulse"] == "0.100000000"
     assert manifest["sources"][0]["parser_version"] == "synthetic-jsonl/1"
     assert manifest["population"]["represented_households"] == 1
     assert manifest["population"]["registered_households"] == 2

@@ -1,0 +1,19 @@
+{
+  "svg_sha256": "a80e6da76729297bb5a042cb281a5ad5795517b3ba855dc317dbee3756eed45d",
+  "artifacts": {
+    "png": {
+      "sha256": "d80b2249bcad2f5259ca7342e01a05fddebdf49c39e98f494fbf156eee1abfd2",
+      "size_bytes": 1131485
+    },
+    "pdf": {
+      "sha256": "ef64ad284684e60d500b1b5eae8369b1520ba94b8aae83e84200daa36b91a7c6",
+      "size_bytes": 626639
+    }
+  },
+  "fields": 51,
+  "models": 7,
+  "modelConnections": 85,
+  "layoutDefects": [],
+  "runtimeErrors": [],
+  "trainingExecuted": false
+}

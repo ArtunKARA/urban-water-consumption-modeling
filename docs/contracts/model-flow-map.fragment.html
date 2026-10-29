@@ -1,0 +1,205 @@
+<div id="uw-model-flow">
+  <style>
+    #uw-model-flow { color:var(--foreground); }
+    #uw-model-flow h3 { margin:0 100px 14px 0; }
+    #uw-model-flow .flow-legend { display:flex; flex-wrap:wrap; gap:8px 18px; margin:14px 0; }
+    #uw-model-flow .flow-legend span { display:inline-flex; align-items:center; gap:6px; }
+    #uw-model-flow .flow-dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+    #uw-model-flow .flow-dot.source { background:var(--red); }
+    #uw-model-flow .flow-dot.data { background:var(--green); }
+    #uw-model-flow .flow-dot.model { background:var(--orange); }
+    #uw-model-flow .flow-dot.output { background:var(--blue); }
+    #uw-model-flow .flow-graph { position:relative; padding:6px 0; isolation:isolate; }
+    #uw-model-flow .flow-connectors { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:-1; overflow:visible; }
+    #uw-model-flow .flow-sources { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,205px),1fr)); gap:22px; }
+    #uw-model-flow .flow-source-group { min-width:0; }
+    #uw-model-flow .flow-node { background:var(--background); padding:10px 12px; border:1px solid var(--border); border-radius:9px; overflow-wrap:anywhere; color:var(--foreground); min-width:0; }
+    #uw-model-flow .flow-source-node { background:color-mix(in srgb,var(--red) 12%,var(--background)); margin:0 16px; }
+    #uw-model-flow .flow-fields { display:grid; grid-template-columns:minmax(0,1fr); gap:12px; margin:24px 16px 0; }
+    #uw-model-flow .flow-field { background:color-mix(in srgb,var(--green) 12%,var(--background)); }
+    #uw-model-flow .flow-field[data-role="context"], #uw-model-flow .flow-field[data-role="gate"] { border-style:dashed; }
+    #uw-model-flow .flow-field[aria-current="true"] { outline:2px solid var(--ring); outline-offset:2px; }
+    #uw-model-flow .flow-node small { display:block; }
+    #uw-model-flow .flow-central { display:grid; justify-items:center; gap:32px; margin-top:52px; }
+    #uw-model-flow .flow-model-node { background:color-mix(in srgb,var(--orange) 15%,var(--background)); width:min(100%,480px); box-sizing:border-box; text-align:center; }
+    #uw-model-flow .flow-output-node { background:color-mix(in srgb,var(--blue) 12%,var(--background)); width:min(100%,560px); box-sizing:border-box; text-align:center; }
+    #uw-model-flow .flow-central strong { font-weight:500; }
+    #uw-model-flow .flow-selection { margin:16px 0; overflow-wrap:anywhere; min-height:24px; }
+    #uw-model-flow .flow-plan { margin-top:20px; }
+    #uw-model-flow dl { display:grid; grid-template-columns:minmax(95px,1fr) 4fr; gap:10px 16px; margin:14px 0; }
+    #uw-model-flow dt { font-weight:500; }
+    #uw-model-flow dd { margin:0; overflow-wrap:anywhere; }
+    #uw-model-flow details { margin:12px 0; }
+    #uw-model-flow summary { font-weight:500; }
+    #uw-model-flow .flow-inventory-group { margin:18px 0; }
+    #uw-model-flow .flow-inventory-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr)); gap:8px; margin-top:10px; }
+    @media (max-width:450px) {
+      #uw-model-flow .flow-sources { grid-template-columns:1fr; gap:30px; }
+      #uw-model-flow dl { grid-template-columns:1fr; gap:4px; }
+      #uw-model-flow dd { margin-bottom:10px; }
+    }
+  </style>
+  <h3>Kaynak → alan → model → çıktı</h3>
+  <div class="viz-controls">
+    <label class="form-label" for="uw-flow-model">Model akışı</label>
+    <select id="uw-flow-model" class="form-select" aria-label="Model akışı"></select>
+  </div>
+  <div class="flow-legend text-small" aria-label="Renk ve bağlantı sözlüğü">
+    <span><i class="flow-dot source" aria-hidden="true"></i>Kaynak</span>
+    <span><i class="flow-dot data" aria-hidden="true"></i>Veri alanı</span>
+    <span><i class="flow-dot model" aria-hidden="true"></i>Model / analiz</span>
+    <span><i class="flow-dot output" aria-hidden="true"></i>Çıktı</span>
+    <span>— Temel girdi</span><span>┄ Aday bağlam / kontrol</span>
+  </div>
+  <div id="uw-flow-graph" class="flow-graph" role="group" aria-label="Seçili modelin kaynak ve alan bağlantıları"></div>
+  <div id="uw-flow-selection" class="flow-selection text-small" aria-live="polite"></div>
+  <details class="flow-plan">
+    <summary>İlk deneme planı · eğitim çalıştırılmadı</summary>
+    <dl id="uw-flow-plan"></dl>
+  </details>
+  <details id="uw-flow-review-box">
+    <summary>Yorum / değerlendirme alanları · eğitim girdisi değil</summary>
+    <div id="uw-flow-review"></div>
+  </details>
+  <details>
+    <summary>Planlanan kaynak ve alan envanteri</summary>
+    <div id="uw-flow-inventory"></div>
+  </details>
+  <details>
+    <summary>Ortak veri ve eğitim koşulları</summary>
+    <ul id="uw-flow-controls"></ul>
+  </details>
+  <script id="uw-flow-data" type="application/json">{"version": "0.1", "status": "planning-not-trained", "initial_model": "A01", "updated_on": "2026-10-27", "contract": "research-data-contract.v0.1.schema.json", "sources": {"survey": {"label": "Saha anketi", "kind": "external", "schema_definitions": ["SurveyAnswers", "SurveyResponse", "HouseholdEvent"], "status": "Soru formu incelendi; doldurulmuş yanıtlar henüz doğrulanmadı."}, "profiles": {"label": "İSU hane / kişi tabloları", "kind": "external", "schema_definitions": ["InstitutionalHouseholdProfile", "MemberProfile"], "status": "Tablo yapısı incelendi; temiz araştırma eşlemesi hazırlanacak."}, "meter": {"label": "Sayaç / veri aktarımı", "kind": "external", "schema_definitions": ["MeterMeasurement", "DeviceStatus"], "status": "Gerçek sağlayıcı örneği ve zaman çözünürlüğü bekleniyor."}, "registry": {"label": "Abonelik / kurulum kayıtları", "kind": "external", "schema_definitions": ["Configuration", "Installation", "HouseholdLink", "Area", "Meter"], "status": "Araştırma kodları ve tarihli kapsam eşlemesi doğrulanacak."}, "billing": {"label": "İSU dönem tüketimleri", "kind": "external", "schema_definitions": ["MonthlyConsumption", "AreaConsumption"], "status": "Aylık ve bölgesel kapsam / erişim doğrulanacak."}, "weather": {"label": "Meteorolojik veri", "kind": "external", "schema_definitions": ["Weather"], "status": "Sağlayıcı, bölge ve yayımlanma zamanı eşlemesi belirlenecek."}, "reference": {"label": "Sayaç referans kaynağı", "kind": "external", "schema_definitions": ["MeterErrorCurve"], "status": "Geçerli eğri / kalibrasyon ve model uygunluğu doğrulanacak."}, "upstream": {"label": "A01 modelinin çıktısı", "kind": "model_output", "schema_definitions": ["Anomaly"], "status": "Henüz üretilmedi; V01 için modelden gelen ara sonuç."}}, "fields": {"H01": {"source": "survey", "label": "Hanede kalan kişi sayısı", "schema_ref": "#/$defs/SurveyAnswers/properties/H01"}, "H03": {"source": "survey", "label": "Gündüz evde bulunan kişi sayısı", "schema_ref": "#/$defs/SurveyAnswers/properties/H03"}, "H04": {"source": "survey", "label": "Yıl boyu / dönemsel kullanım", "schema_ref": "#/$defs/SurveyAnswers/properties/H04"}, "G01": {"source": "survey", "label": "Gelir bandı — kesin maaş değil", "schema_ref": "#/$defs/SurveyAnswers/properties/G01"}, "K01": {"source": "survey", "label": "Konut türü", "schema_ref": "#/$defs/SurveyAnswers/properties/K01"}, "K03": {"source": "survey", "label": "Konut alanı bandı", "schema_ref": "#/$defs/SurveyAnswers/properties/K03"}, "K05": {"source": "survey", "label": "Özel bahçe / sulanan alan var mı?", "schema_ref": "#/$defs/SurveyAnswers/properties/K05"}, "K06": {"source": "survey", "label": "Bahçe suyu izlenen sayaçtan mı?", "schema_ref": "#/$defs/SurveyAnswers/properties/K06"}, "K08": {"source": "survey", "label": "Sayaç yalnız bu haneyi mi ölçüyor?", "schema_ref": "#/$defs/SurveyAnswers/properties/K08"}, "K09": {"source": "survey", "label": "Alternatif su kaynağı", "schema_ref": "#/$defs/SurveyAnswers/properties/K09"}, "K10": {"source": "survey", "label": "Su deposu var mı?", "schema_ref": "#/$defs/SurveyAnswers/properties/K10"}, "E01": {"source": "survey", "label": "Çamaşır / bulaşık / arıtma cihazı varlığı", "schema_ref": "#/$defs/SurveyAnswers/properties/E01"}, "D07": {"source": "survey", "label": "Son 30 günde bildirilen kaçak", "schema_ref": "#/$defs/SurveyAnswers/properties/D07"}, "O01": {"source": "survey", "label": "Misafir / boş kalma / tadilat gibi olay", "schema_ref": "#/$defs/SurveyAnswers/properties/O01"}, "consent": {"source": "survey", "label": "Katılım onay durumu", "schema_ref": "#/$defs/SurveyResponse/properties/participation_consent"}, "installation_consent": {"source": "survey", "label": "Kurulum onay durumu", "schema_ref": "#/$defs/SurveyResponse/properties/installation_consent"}, "home_category": {"source": "profiles", "label": "Aile / bekar / öğrenci hane kategorisi", "schema_ref": "#/$defs/InstitutionalHouseholdProfile/properties/home_category"}, "dwelling_type": {"source": "profiles", "label": "Kurumsal konut sınıfı", "schema_ref": "#/$defs/InstitutionalHouseholdProfile/properties/dwelling_type"}, "household_size": {"source": "profiles", "label": "Kurumsal hane nüfusu — 8+ korunur", "schema_ref": "#/$defs/InstitutionalHouseholdProfile/properties/household_size"}, "pets": {"source": "profiles", "label": "Evcil hayvan kategorisi", "schema_ref": "#/$defs/InstitutionalHouseholdProfile/properties/pets_category"}, "legacy_income": {"source": "profiles", "label": "Eski gelir sınıfı — G01 ile aynı değil", "schema_ref": "#/$defs/InstitutionalHouseholdProfile/properties/income_category"}, "age": {"source": "profiles", "label": "Kişi yaş bandı", "schema_ref": "#/$defs/MemberProfile/properties/age_band"}, "gender": {"source": "profiles", "label": "Kaynak cinsiyet kategorisi", "schema_ref": "#/$defs/MemberProfile/properties/sex_gender_category"}, "marital": {"source": "profiles", "label": "Medeni durum kategorisi", "schema_ref": "#/$defs/MemberProfile/properties/marital_status"}, "education": {"source": "profiles", "label": "Eğitim kategorisi", "schema_ref": "#/$defs/MemberProfile/properties/education_category"}, "activity": {"source": "profiles", "label": "Faaliyet / çalışma kategorisi", "schema_ref": "#/$defs/MemberProfile/properties/activity_category"}, "raw": {"source": "meter", "label": "Pulse / endeks / dönem okuması ve zamanı", "schema_ref": "#/$defs/MeterMeasurement"}, "device": {"source": "meter", "label": "Varsa heartbeat / bağlantı / arıza durumu", "schema_ref": "#/$defs/DeviceStatus"}, "configuration": {"source": "registry", "label": "Litre/pulse ve konfigürasyon geçerliliği", "schema_ref": "#/$defs/Configuration"}, "mapping": {"source": "registry", "label": "Sayaç → kurulum → ölçüm noktası → hane", "schema_ref": "#/$defs/Installation"}, "scope": {"source": "registry", "label": "Tek hane / ortak / bilinmeyen ölçüm kapsamı", "schema_ref": "#/$defs/HouseholdLink"}, "area": {"source": "registry", "label": "Bölge ve üst bölge kodu", "schema_ref": "#/$defs/Area"}, "meter_model": {"source": "registry", "label": "Sayaç teknolojisi ve model kodu", "schema_ref": "#/$defs/Meter"}, "monthly": {"source": "billing", "label": "Kodlanmış aboneliğin dönem tüketimi", "schema_ref": "#/$defs/MonthlyConsumption"}, "regional": {"source": "billing", "label": "Bağımsız bölgesel tüketim ve kapsamı", "schema_ref": "#/$defs/AreaConsumption"}, "temperature": {"source": "weather", "label": "Sıcaklık", "schema_ref": "#/$defs/Weather/properties/variables", "selector": "name=temperature"}, "rain": {"source": "weather", "label": "Yağış", "schema_ref": "#/$defs/Weather/properties/variables", "selector": "name=precipitation"}, "drought": {"source": "weather", "label": "Varsa kuraklık indeksi", "schema_ref": "#/$defs/Weather/properties/variables", "selector": "name=drought_index"}, "weather_issued": {"source": "weather", "label": "Hava yayım / erişim zamanı kontrolü", "schema_ref": "#/$defs/Weather/properties/issued_at", "definition": "forecast kaydında issued_at ve source_ref.known_at, observed kaydında source_ref.known_at değerlendirilir. observed kaydına sahte issued_at yazılmaz; scenario ayrı varyanttır."}, "curve": {"source": "reference", "label": "Debiye göre işaretli hata eğrisi", "schema_ref": "#/$defs/MeterErrorCurve"}, "events": {"source": "survey", "label": "Tarihli olay ve kanıt türü", "schema_ref": "#/$defs/HouseholdEvent"}, "liters": {"source": "meter", "label": "Türetilen saatlik / günlük litre", "derived_from": ["raw", "configuration", "mapping", "scope"], "definition": "Zaman ve konfigürasyonla normalize edilir. Aynı suyun farklı temsilleri toplanmaz; eksik dönemler sıfır yapılmaz."}, "coverage": {"source": "meter", "label": "Türetilen kapsama / kalite durumu", "allowed_roles": ["gate", "review"], "derived_from": ["raw", "device"], "definition": "Girdi döneminin kapsaması as_of anındaki kanıtla, hedef döneminin kapsaması sonradan hedef uygunluğu için ayrı değerlendirilir. Hedefteki gelecek durum bilgisi özellik yapılmaz. Pulse yokluğundan tam kapsama veya sıfır tüketim çıkarılmaz."}, "shape": {"source": "meter", "label": "Saatlere göre tüketim payları", "derived_from": ["liters", "coverage"], "definition": "Uygun hane-dönemde hacimden bağımsız şekil vektörü; toplamı sıfır günler ayrı ele alınır."}, "daily_history": {"source": "meter", "label": "Günlük gecikmeler ve hareketli özetler", "derived_from": ["liters", "coverage"], "definition": "Başlangıç adayları: tahmin anından önce tamamlanmış 1/7/14 gün ve geçmiş 7/14 gün özetleri. İçinde bulunulan tamamlanmamış gün tam gün sayılmaz; hedef gün ve sonradan gelen revision kullanılmaz."}, "intraday_history": {"source": "meter", "label": "Tahmin saatine kadar gün içi tüketim", "derived_from": ["liters", "coverage", "calendar"], "definition": "Yerel gün başlangıcından as_of öncesine kadar, yalnız as_of anında erişilmiş revisionlarla gözlenen litre, geçen saat ve kapsama özeti. 18:00 ve 23:00 için yeniden çıkarılır; eksik saat sıfır yapılmaz ve kısmi toplam tam günlük tüketim diye adlandırılmaz."}, "hourly_history": {"source": "meter", "label": "Saatlik gecikmeler ve hareketli özetler", "derived_from": ["liters", "coverage"], "definition": "Başlangıç adayları: 1/24/168 saat gecikme ve geçmiş 24/168 saat özeti; tüm ufuklar tahmin anındaki bilgiyle hesaplanır."}, "calendar": {"source": "meter", "label": "Saat / haftanın günü / ay", "derived_from": ["raw"], "definition": "Hedef zamanın takvim bilgisi deterministik türetilir; gelecek tüketim bilgisi değildir."}, "anomaly_features": {"source": "meter", "label": "Pencere hacmi / gece payı / değişim", "derived_from": ["liters", "coverage"], "definition": "Pencere ve gece tanımı deney manifestinde sabitlenir. Saatlik veriden dakika düzeyinde sürekli akış iddiası kurulmaz."}, "flow_profile": {"source": "meter", "label": "Çözünürlük uygunsa debi–hacim dağılımı", "derived_from": ["raw", "configuration", "coverage"], "definition": "Seyrek endeks veya kaba dönem toplamından anlık debi profili uydurulmaz. Ölçülen debi mi referans debi mi olduğu ayrıca açıklanır."}, "anomaly_output": {"source": "upstream", "label": "Anomali adayı, skor ve zaman aralığı", "producer_model": "A01", "schema_ref": "#/$defs/Anomaly"}}, "models": [{"id": "P01", "label": "Tüketim profili", "question": "Hanenin tüketim alışkanlığı hangi profile benziyor?", "kind": "learned", "stage": "ilk eğitim adayı", "experiment_design": {"kind": "profile_context_comparison", "label": "Tüketim / tüketim+hane", "variant_ids": ["consumption", "household"], "shared_splits": true, "separate_reports": true}, "output_family": "profiles", "base_gates": ["coverage", "mapping", "scope"], "optional_gates": [], "variants": [{"id": "consumption", "label": "Yalnız tüketim şekli", "context_fields": [], "gate_fields": []}, {"id": "household", "label": "Tüketim ve hane bağlamı", "context_fields": ["H01", "H03", "H04", "K01", "K03", "K05", "K06", "E01"], "gate_fields": []}], "algorithm": "KMeans; ilk aday k=2..6, n_init=20, random_state=42. Örnek sayısı ve kararlılıkla seçim; sabit sayıda küme varsayılmaz.", "baseline": "Yalnız tüketim şekli; bağlamın sonradan profil yorumunda kullanılması temel karşılaştırma.", "target": "Denetimsiz küme ataması; hazır doğru profil etiketi yok.", "inputs": [["shape", "feature"], ["coverage", "gate"], ["mapping", "gate"], ["scope", "gate"], ["H01", "context"], ["H03", "context"], ["H04", "context"], ["K01", "context"], ["K03", "context"], ["K05", "context"], ["K06", "context"], ["E01", "context"], ["home_category", "review"], ["dwelling_type", "review"], ["household_size", "review"], ["pets", "review"], ["legacy_income", "review"], ["age", "review"], ["gender", "review"], ["marital", "review"], ["education", "review"], ["activity", "review"], ["G01", "review"]], "outputs": ["profiles: iki yaklaşım için ayrı hane/dönem küme ataması", "Tüketimden üretilip anketle yorumlanan profil ile tüketim+hane profilinin karşılaştırması"], "metrics": "İki yaklaşım ortak tüketim özellik uzayında ve ortak test haneleri/dönemlerinde karşılaştırılır; kendi farklı özellik uzaylarının silhouette puanları doğrudan üstünlük ölçüsü yapılmaz. Küme kararlılığı, küçük kümeler ve dışlamalar ayrıca. Yerel/dağıtık eşdeğerlik her yaklaşımın kendi içinde ölçülür.", "split": "Zamansal ayrım ve ayrı hane holdout. Profil çıkarma, ölçekleme ve küme seçimi eğitimden; yorum/test verisiyle yeniden fit yok.", "requires": "Kapsaması kanıtlanmış uygun hane-dönemler; sıfır toplam günlere ayrı durum; uygun örnek sayısı. Kişi profilleri hane düzeyinde özetlenmeden tüketim satırlarına çoğaltılmaz.", "open": "Şekil vektörünün hafta içi/sonu ayrımı, uygun dönem uzunluğu ve asgari kapsama eşiği veri profiliyle belirlenecek.", "documentation": "https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html"}, {"id": "F01", "label": "Günlük talep tahmini", "question": "Sonraki yerel takvim gününde kaç litre tüketilecek?", "kind": "learned", "stage": "ilk eğitim adayı", "experiment_design": {"kind": "daily_issuance_comparison", "label": "18:00 / 23:00 · ayrı rapor", "local_times": ["18:00", "23:00"], "timezone": "Europe/Istanbul", "target_policy": "next_local_calendar_day", "shared_target_days": true, "shared_splits": true, "separate_reports": true, "reuse_later_features": false}, "output_family": "forecasts", "base_gates": ["coverage", "mapping", "scope"], "optional_gates": [], "variants": [{"id": "history", "label": "Yalnız geçmiş ve takvim", "context_fields": [], "gate_fields": []}, {"id": "household", "label": "Geçmiş ve hane bağlamı", "context_fields": ["H01", "H03", "H04", "G01", "K01", "K03", "K05", "K06", "K09", "K10", "E01"], "gate_fields": []}, {"id": "weather", "label": "Hane ve tahmin anında bilinen hava", "context_fields": ["H01", "H03", "H04", "G01", "K01", "K03", "K05", "K06", "K09", "K10", "E01", "temperature", "rain"], "gate_fields": ["weather_issued", "area"]}], "algorithm": "HistGradientBoostingRegressor; ilk aday loss=poisson, max_iter=100, early_stopping=false, random_state=42. Hedefler negatif olamaz; eğitim hedef toplamı pozitif değilse öğrenilmiş model yerine durum/temel karşılaştırma raporlanır.", "baseline": "Önceki haftanın aynı günü; sonra yalnız geçmiş modeli; son olarak hane ve hava bağlamlı deney.", "target": "Tahmin anından sonraki yerel takvim gününün uygun kapsamlı litre toplamı; kısmi gözlenen hacim tam gün hedefi sayılmaz.", "inputs": [["daily_history", "feature"], ["intraday_history", "feature"], ["calendar", "feature"], ["coverage", "gate"], ["mapping", "gate"], ["scope", "gate"], ["H01", "context"], ["H03", "context"], ["H04", "context"], ["G01", "context"], ["K01", "context"], ["K03", "context"], ["K05", "context"], ["K06", "context"], ["K09", "context"], ["K10", "context"], ["E01", "context"], ["temperature", "context"], ["rain", "context"], ["weather_issued", "gate"], ["area", "gate"], ["monthly", "review"]], "outputs": ["forecasts: 18:00 ve 23:00 için ayrı günlük tahmin", "Saatlere ayrı başarı raporu ve ortak uygun hane-günlerde eşlenmiş karşılaştırma"], "metrics": "MAE, RMSE, WAPE (sıfır payda ayrı); belirsizlik aralığı ayrı deneyde üretilirse kapsama.", "split": "18:00 ve 23:00 deneyleri Europe/Istanbul saat diliminde ayrı fit/koşum/rapor kullanır. Aynı hane ve hedef güne ait iki saat bütün varyantlarda aynı bölmede tutulur. Özellikler her as_of için ayrı çıkarılır; 23:00 bilgisi 18:00'e taşınmaz. Eşlenmiş saat karşılaştırması ortak uygun hedeflerde yapılır; tüm uygun hedefler ve eşlenemeyen dışlamalar ayrıca raporlanır.", "requires": "En büyük gecikmeye yetecek geçmiş; hedef gün kapsama kanıtı; hane kapsamı. Hava dalı için as_of anında yayımlanmış kayıt.", "open": "Üretim saatleri 18:00 ve 23:00 olarak kararlaştırıldı. Eğitim/validasyon/test tarihleri, yeniden eğitim sıklığı ve kapsama eşiği veriyle sabitlenecek.", "documentation": "https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.HistGradientBoostingRegressor.html"}, {"id": "F02", "label": "Saatlik talep tahmini", "question": "Sonraki 24 saatin her birinde kaç litre tüketilecek?", "kind": "learned", "stage": "ilk eğitim adayı", "output_family": "forecasts", "base_gates": ["coverage", "mapping", "scope"], "optional_gates": [], "variants": [{"id": "history", "label": "Yalnız geçmiş ve takvim", "context_fields": [], "gate_fields": []}, {"id": "household", "label": "Geçmiş ve hane bağlamı", "context_fields": ["H01", "H03", "H04", "K05", "K06", "K09", "K10", "E01"], "gate_fields": []}, {"id": "weather", "label": "Hane ve tahmin anında bilinen hava", "context_fields": ["H01", "H03", "H04", "K05", "K06", "K09", "K10", "E01", "temperature", "rain"], "gate_fields": ["weather_issued", "area"]}], "algorithm": "24 ufuk için ayrı doğrudan HistGradientBoostingRegressor. Başlangıç parametreleri F01 gibi; her ufkun girdisi aynı tahmin anında bilinen veriden.", "baseline": "Önceki haftanın aynı saati; yalnız geçmiş; sonra bağlam eklenmiş modeller.", "target": "Sonraki 24 adet saatlik litre değeri. F01 ile dönem eşitliği yoksa toplam eşitliği zorlanmaz.", "inputs": [["hourly_history", "feature"], ["calendar", "feature"], ["coverage", "gate"], ["mapping", "gate"], ["scope", "gate"], ["H01", "context"], ["H03", "context"], ["H04", "context"], ["K05", "context"], ["K06", "context"], ["K09", "context"], ["K10", "context"], ["E01", "context"], ["temperature", "context"], ["rain", "context"], ["weather_issued", "gate"], ["area", "gate"]], "outputs": ["forecasts: 24 saatlik tahmin dizisi", "Ufka göre ve toplam saatlik deney raporu"], "metrics": "Saat ve ufuk bazında MAE/RMSE/WAPE; günlük deneyden ayrı rapor.", "split": "Kayan başlangıç; her 24 saatlik hedef bloğu tek değerlendirme bölmesinde. İleri ufuklara gerçekleşmiş ara tüketim verilmez; hedefler örtüşüyorsa rapor bunu belirtir.", "requires": "168 saat gecikmeyi kapsayan uygun geçmiş ve yeterli saat çözünürlüğü; belirsiz kapsamlı saatler uygunluk filtresinde.", "open": "Tahmin başlangıç sıklığı ve kapsama eşikleri veri profiline göre; 24 ufuk için yeterli eğitim örneği ayrıca kontrol edilecek.", "documentation": "https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.HistGradientBoostingRegressor.html"}, {"id": "A01", "label": "Anomali tespiti", "question": "Olağandışı tüketim adayı var mı; ne zaman ve hangi skorla?", "kind": "learned", "stage": "ilk eğitim adayı", "experiment_design": {"kind": "anomaly_scenarios", "label": "Kaçak / normal / cihaz-veri", "scenario_families": ["leak", "normal_behavior_change", "device_or_transport_fault"], "normal_examples": ["guest", "vacancy"], "fault_examples": ["dropout", "delay", "duplicate", "counter_reset"], "separate_reports": true, "truth_in_features": false, "normal_changes_are_leaks": false, "device_faults_are_leaks": false, "fault_output_family": "quality"}, "output_family": "anomalies", "base_gates": ["coverage", "mapping", "scope"], "optional_gates": ["device"], "variants": [{"id": "consumption", "label": "Tüketim ve gözlenebilir kalite kanıtı", "context_fields": [], "gate_fields": []}], "algorithm": "IsolationForest; ilk aday n_estimators=100, contamination=auto, random_state=42. Olay karar eşiği yalnız eğitim/validasyonda; otomatik eşik gerçek kaçak oranı kabul edilmez.", "baseline": "Eğitimden türetilmiş dayanıklı eşik; seçilen dedektör; dedektör + V01 karşılaştırması.", "target": "Denetimsiz anomali skoru ve aday pencere; gerçek kaçak sınıfı diye adlandırılmaz.", "inputs": [["anomaly_features", "feature"], ["coverage", "gate"], ["device", "gate"], ["mapping", "gate"], ["scope", "gate"], ["D07", "review"], ["O01", "review"], ["events", "review"]], "outputs": ["anomalies: aday zaman aralığı ve skor", "V01'e aktarılacak aday kaydı"], "metrics": "Kaçak, normal davranış değişimi ve cihaz/aktarım sorunu ayrı raporlanır. Kaçak yakalama ve gecikme yalnız bağımsız kaçak gerçeğiyle; normal misafir/boş kalma örneklerinde yanlış kaçak alarmı ayrıca. Cihaz/veri sorunları kalite ve yeterlilik çıktısıyla değerlendirilir; gizli arıza gerçeği modele özellik verilmez. Genel olağandışı tüketim adayı ile doğrulanmış kaçak ölçütleri karıştırılmaz.", "split": "Zamansal ve ayrı hane holdout; etiket ve sentetik truth fit özelliklerine girmez. Eşik test sonuçlarına bakılarak seçilmez.", "requires": "Tanımlı pencere ve kapsama; aday özelliklerin gözlenebilirliği. Cihaz durumu yoksa yokluk sıfır tüketim veya offline demek değildir.", "open": "Pencere uzunluğu, gece saatleri ve olay eşleştirme toleransı eğitim öncesi manifestte sabitlenecek.", "documentation": "https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html"}, {"id": "V01", "label": "Durum makinesi", "question": "Anomali adayı hangi durum ve geçiş gerekçesiyle değerlendirildi?", "kind": "rules", "stage": "kural / doğrulama tasarımı", "output_family": "decisions", "base_gates": ["coverage"], "optional_gates": ["device"], "variants": [{"id": "rules", "label": "Aday ve tanımlı gözlem sembolleri", "context_fields": [], "gate_fields": []}], "algorithm": "Öğrenilmiş model değil; açık veri-sembol eşlemesi ve sürümlü durum/geçiş kuralları.", "baseline": "A01 tek başına ile A01 + durum makinesi karşılaştırması.", "target": "Durum izi ve gerekçeli karar; sahada doğrulanmış kaçak etiketi değil.", "inputs": [["anomaly_output", "feature"], ["coverage", "gate"], ["device", "gate"], ["events", "review"]], "outputs": ["decisions: durum, geçiş, karar gerekçesi", "Model/uygulama uyum ve biçimsel kontrol kayıtları"], "metrics": "Geçersiz geçiş, kilitlenme, anlamsız doğrulama; veri-sembol ve uygulama-model uyumu. A01 olay ölçümleri ayrı.", "split": "Kural/eşik seçimi yalnız eğitim/validasyon senaryolarından; test senaryoları değerlendirme için ayrılır.", "requires": "Durum/geçiş tablosu, sayaç verisinden sembol üretme tanımı ve karşı örnekler.", "open": "Durum adları ve bekleme/geçiş süreleri gerçek gözlenebilirlik ve senaryolar üzerinden netleştirilecek. Şimdilik biçimsel doğrulama yapılmış değildir."}, {"id": "E01", "label": "Sayaç hata analizi", "question": "Bu tüketim profili için referansa dayalı hata ne olur?", "kind": "analytical", "stage": "referans ve çözünürlük koşuluna bağlı", "output_family": "meter_performance", "base_gates": ["meter_model", "configuration", "coverage"], "optional_gates": [], "variants": [{"id": "reference", "label": "Geçerli referans ve hacim temeli", "context_fields": [], "gate_fields": []}], "algorithm": "e=(V_olculen-V_referans)/V_referans; toplam hata referans hacimleriyle ağırlıklanır. Yalnız ölçülen hacim varsa V_referans=V_olculen/(1+e) dönüşümü ancak e>-1 ve doğru debi/eğri temeliyle yapılabilir. Ölçülen hacimle doğrudan ağırlıklandırma yok; eğri dışına sessiz ekstrapolasyon yok.", "baseline": "Aynı uygulanabilir tüketim profili üzerinde geçerli sayaç eğrilerinin karşılaştırması.", "target": "Referans/varsayım altındaki hata özeti; bağımsız ölçülmüş gerçek hata değildir.", "inputs": [["flow_profile", "feature"], ["curve", "feature"], ["meter_model", "gate"], ["configuration", "gate"], ["coverage", "gate"]], "outputs": ["meter_performance: ağırlıklı hata ve geçerli kapsam", "Varsayım / referans / dışlanan hacim bilgisi"], "metrics": "Eğrinin kapsadığı hacim oranı ve varsayım duyarlılığı; bağımsız referans varsa gerçek hata doğrulaması ayrıca.", "split": "Eğitim yok; referans, kalibrasyon ve analiz dönemi sürümlenir.", "requires": "Debi çözünürlüğü, eğrinin flow_basis/error_definition bilgisi ve hacim/debi referans temeli açık olmalı; eksikse insufficient_data. Ölçülen debi, gerçek debi eksenli eğriye doğrudan konulmaz.", "open": "Eğrilerin geçerli teknoloji/modelleri ve debi-hacmin gerçek mi ölçülmüş mü olduğu örnek kaynaklarla doğrulanacak."}, {"id": "F03", "label": "Bölgesel / kuraklık uzantısı", "question": "Bölgesel talep, belirtilen hava / kuraklık senaryosunda nasıl değişiyor?", "kind": "conditional", "stage": "bağımsız bölge verisine bağlı uzantı", "output_family": "forecasts", "base_gates": ["area"], "optional_gates": [], "variants": [{"id": "regional_history", "label": "Yalnız bölgesel geçmiş", "context_fields": [], "gate_fields": []}, {"id": "regional_weather", "label": "Bilinen hava ile bölgesel tahmin", "context_fields": ["temperature", "rain"], "gate_fields": ["weather_issued"]}, {"id": "drought_scenario", "label": "Açık varsayımlı kuraklık senaryosu", "mode": "scenario", "context_fields": ["temperature", "rain", "drought"], "gate_fields": []}], "algorithm": "Bölgesel geçmişe dayalı karşılaştırma ve bağlamlı tahmin; algoritma veri dönem/çözünürlüğünden sonra seçilecek.", "baseline": "Aynı hedef döneminde mevsimsel naif ve yalnız bölgesel geçmiş.", "target": "Kurumsal bölge toplamıyla aynı dönem/çözünürlükte bölgesel talep. Aylık toplamdan günlük gerçek hedef türetilmez.", "inputs": [["regional", "feature"], ["area", "gate"], ["temperature", "context"], ["rain", "context"], ["drought", "context"], ["weather_issued", "gate"]], "outputs": ["forecasts: kapsamı belirtilmiş bölgesel tahmin", "Varsayımları belirtilmiş senaryo karşılaştırması"], "metrics": "Bağımsız bölge toplamına karşı aynı dönemde hata; hipotetik senaryo için ölçülmüş nedensellik iddiası yok.", "split": "Bölgesel zaman ayrımı ve as_of; pilot hane toplamı doğrulama hedefi değildir.", "requires": "Bağımsız bölge serisi, kaynak nüfus kapsamı, temsil ve uyumlu çevre dönemi.", "open": "Bölgesel veri erişimi, hedef çözünürlük ve kuraklık senaryosunun varsayımları kesinleştirilecek."}], "global_controls": ["Araştırma kimlikleri eşleştirme anahtarıdır; varsayılan model özelliği değildir.", "Onay ve izin referansları kaynak/amaç bazında kontrol edilir; model özelliği yapılmaz.", "Sentetik truth ve bağımsız uzman etiketleri değerlendirmede ayrı tutulur; test bilgisi eğitime sızdırılmaz.", "Context bağlantıları bağlam ekleme deneyidir; review bağlantıları öğrenme özelliği değildir.", "Tüm modellerde hane/kişi satırları tüketimi çoğaltmadan birleştirilir. Ortak sayaç hanelere eşit bölünmez.", "Aylık tüketim ve pulse aynı suyun farklı temsilleriyse birlikte toplanmaz.", "Eğitim/validasyon/test tarihleri ve veri yeterlilik eşikleri veri profili görülmeden gerçekmiş gibi doldurulmaz.", "İlk aday algoritmalar plan kararıdır; hiçbir model bu dosyayla kurulmuş veya eğitilmiş olmaz."], "contract_sha256": "f1932afc6dec1b118306dd128867c3c4c8d90df82032ec374314ae56587430f8"}</script>
+  <script>
+    (() => {
+      const root = document.getElementById('uw-model-flow');
+      const map = JSON.parse(root.querySelector('#uw-flow-data').textContent);
+      const select = root.querySelector('#uw-flow-model');
+      const graph = root.querySelector('#uw-flow-graph');
+      const detail = root.querySelector('#uw-flow-selection');
+      const plan = root.querySelector('#uw-flow-plan');
+      const review = root.querySelector('#uw-flow-review');
+      const inventory = root.querySelector('#uw-flow-inventory');
+      const roles = {feature:'Temel özellik', context:'Aday bağlam', gate:'Veri uygunluk kontrolü', review:'Yorum / değerlendirme'};
+      const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      let selected = map.initial_model;
+      let selectedField = null;
+      let resizePending = false;
+      const saved = window.openai?.widgetState;
+      if (map.models.some(m => m.id === saved?.modelContent?.model_id)) selected = saved.modelContent.model_id;
+      if (Object.hasOwn(map.fields,saved?.modelContent?.field_id)) selectedField = saved.modelContent.field_id;
+
+      select.innerHTML = map.models.map(m => `<option value="${esc(m.id)}">${esc(m.id)} · ${esc(m.label)}</option>`).join('');
+      select.value = selected;
+      root.querySelector('#uw-flow-controls').innerHTML = map.global_controls.map(c => `<li>${esc(c)}</li>`).join('');
+
+      function persist() {
+        if (window.openai?.setWidgetState) window.openai.setWidgetState({
+          modelContent:{model_id:selected,field_id:selectedField}, privateContent:null
+        }).catch(() => {});
+      }
+      function fieldMarkup(id, role, prefix) {
+        const field = map.fields[id];
+        return `<div class="flow-node flow-field" data-field-id="${esc(id)}" data-role="${esc(role)}" id="${prefix}-${esc(id)}">
+          <div>${esc(field.label)}</div>
+          <div class="viz-row"><button type="button" class="btn btn-ghost" data-field-select="${esc(id)}" aria-label="${esc(field.label)} bağlantılarını incele">${id.length <= 5 ? esc(id) : 'Seç'}</button>
+          <small class="text-small">${esc(id)} · ${esc(roles[role] || 'Kaynak alanı')}</small></div></div>`;
+      }
+      function describeField(id) {
+        if (!Object.hasOwn(map.fields,id)) return;
+        selectedField = id;
+        const field = map.fields[id];
+        const model = map.models.find(m => m.id === selected);
+        const use = model.inputs.find(pair => pair[0] === id);
+        const conditions = model.variants.filter(v => v.gate_fields.includes(id)).map(v => v.label);
+        const condition = model.optional_gates.includes(id) ? 'Varsa kullanılan ek kanıt' :
+          (conditions.length ? 'Yalnız: '+conditions.join(', ') : '');
+        const links = map.models.filter(m => m.inputs.some(pair => pair[0] === id)).map(m => m.id).join(', ');
+        detail.textContent = `${id} · ${field.label} · ${roles[use?.[1]] || 'Bu modelde kullanılmıyor'}${condition ? ' · '+condition : ''} · Bağlantılar: ${links || 'Ortak kaynak kontrolü'}`;
+        root.querySelectorAll('[data-field-id]').forEach(el => el.setAttribute('aria-current', String(el.dataset.fieldId === id)));
+        draw();
+      }
+      function renderInventory() {
+        inventory.innerHTML = Object.entries(map.sources).map(([id, source]) => {
+          const entries = Object.entries(map.fields).filter(([, f]) => f.source === id);
+          return `<section class="flow-inventory-group"><div class="flow-node flow-source-node">${esc(source.label)}<small class="text-small">${esc(source.status)}</small></div>
+            <div class="flow-inventory-grid">${entries.map(([fid]) => fieldMarkup(fid, '', 'inventory')).join('')}</div></section>`;
+        }).join('');
+      }
+      function render() {
+        const model = map.models.find(m => m.id === selected);
+        const active = model.inputs.filter(([, role]) => role !== 'review');
+        const sourceIds = [...new Set(active.map(([id]) => map.fields[id].source))];
+        graph.innerHTML = `<svg class="flow-connectors" aria-hidden="true"></svg>
+          <div class="flow-sources">${sourceIds.map(id => {
+            const source = map.sources[id];
+            const fields = active.filter(([fid]) => map.fields[fid].source === id);
+            return `<section class="flow-source-group"><div id="source-${esc(id)}" class="flow-node flow-source-node">${esc(source.label)}</div>
+              <div class="flow-fields">${fields.map(([fid, role]) => fieldMarkup(fid, role, 'field')).join('')}</div></section>`;
+          }).join('')}</div>
+          <div class="flow-central"><div class="flow-node flow-model-node" id="flow-model-node"><strong>${esc(model.id)} · ${esc(model.label)}</strong><small class="text-small">${esc(model.stage)}</small></div>
+          <div class="flow-node flow-output-node" id="flow-output-node"><strong>${esc(model.question)}</strong><small class="text-small">${model.outputs.map(esc).join(' · ')}</small></div></div>`;
+        const variants = model.variants.map(v => v.label+(v.gate_fields.length ? ' [ek kontrol: '+v.gate_fields.join(', ')+']' : '')).join(' · ');
+        const entries = [['Yöntem',model.algorithm],['Karşılaştırma',model.baseline],['Varyantlar',variants],['Çıktı ailesi',model.output_family],['Öğrenilecek hedef',model.target],['Başarı ölçümü',model.metrics],['Veri bölmesi',model.split],['Gereken veri',model.requires],['Açık karar',model.open]];
+        if (model.experiment_design) entries.unshift(['Kararlaştırılan deney',model.experiment_design.label]);
+        plan.innerHTML = entries.map(([key,value]) => `<dt>${esc(key)}</dt><dd>${esc(value)}</dd>`).join('');
+        const reviews = model.inputs.filter(([,role]) => role === 'review');
+        review.innerHTML = reviews.map(([id, role]) => fieldMarkup(id, role, 'review')).join('');
+        root.querySelector('#uw-flow-review-box').hidden = reviews.length === 0;
+        if (selectedField && Object.hasOwn(map.fields,selectedField)) describeField(selectedField);
+        else detail.textContent = `${model.id} · ${model.kind === 'learned' ? 'Öğrenilmiş model adayı' : 'Kural / analitik / koşullu akış'} · Plan aşamasında`;
+        requestAnimationFrame(draw);
+      }
+      function draw() {
+        const svg = graph.querySelector('.flow-connectors');
+        if (!svg) return;
+        const box = graph.getBoundingClientRect();
+        if (!box.width || !box.height) return;
+        svg.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
+        const model = map.models.find(m => m.id === selected);
+        const center = graph.querySelector('#flow-model-node').getBoundingClientRect();
+        const output = graph.querySelector('#flow-output-node').getBoundingClientRect();
+        let paths = '<defs><marker id="uw-flow-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/></marker></defs>';
+        const path = (x1,y1,x2,y2,dashed,emphasis) => {
+          const bend = Math.max(14,(y2-y1)*0.45);
+          return `<path d="M ${x1} ${y1} C ${x1} ${y1+bend}, ${x2} ${y2-bend}, ${x2} ${y2}" fill="none" stroke="currentColor" stroke-width="${emphasis ? 2 : 1}" opacity="${emphasis ? 0.9 : 0.25}" ${dashed ? 'stroke-dasharray="5 4"' : ''} marker-end="url(#uw-flow-arrow)"/>`;
+        };
+        for (const [id,role] of model.inputs) {
+          if (role === 'review') continue;
+          const field = graph.querySelector(`#field-${id}`).getBoundingClientRect();
+          const source = graph.querySelector(`#source-${map.fields[id].source}`).getBoundingClientRect();
+          const emphasis = id === selectedField;
+          const group = graph.querySelector(`#field-${id}`).closest('.flow-source-group').getBoundingClientRect();
+          const y = field.top+field.height/2-box.top;
+          const leftChannel = group.left-box.left+3;
+          const rightChannel = group.right-box.left-3;
+          const centerX = center.left+center.width/2-box.left;
+          const centerY = center.top-box.top;
+          const attrs = `fill="none" stroke="currentColor" stroke-width="${emphasis ? 2 : 1}" opacity="${emphasis ? 0.9 : 0.35}" marker-end="url(#uw-flow-arrow)"`;
+          paths += `<path d="M ${source.left-box.left+8} ${source.bottom-box.top} H ${leftChannel} V ${y} H ${field.left-box.left}" ${attrs}/>`;
+          paths += `<path d="M ${field.right-box.left} ${y} H ${rightChannel} V ${centerY-28} C ${rightChannel} ${centerY-10}, ${centerX} ${centerY-24}, ${centerX} ${centerY}" ${attrs} ${role !== 'feature' ? 'stroke-dasharray="5 4"' : ''}/>`;
+        }
+        paths += path(center.left+center.width/2-box.left,center.bottom-box.top,output.left+output.width/2-box.left,output.top-box.top,false,true);
+        svg.innerHTML = paths;
+      }
+      select.addEventListener('change', () => { selected=select.value; selectedField=null; render(); persist(); });
+      root.addEventListener('click', event => {
+        const button = event.target.closest('[data-field-select]');
+        if (button) { describeField(button.dataset.fieldSelect); persist(); }
+      });
+      window.addEventListener('openai:set_globals', event => {
+        const state=event.detail?.globals?.widgetState?.modelContent;
+        if (map.models.some(m => m.id === state?.model_id)) {
+          selected=state.model_id;
+          selectedField=Object.hasOwn(map.fields,state.field_id) ? state.field_id : null;
+          select.value=selected; render();
+        }
+      });
+      new ResizeObserver(() => {
+        if (!resizePending) { resizePending=true; requestAnimationFrame(() => {resizePending=false; draw();}); }
+      }).observe(graph);
+      renderInventory();
+      render();
+    })();
+  </script>
+</div>

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Kentsel su araştırması — model akışları</title>
+  <style>
+    :root {
+      color-scheme:light dark;
+      --background:light-dark(#ffffff,#141a20);
+      --foreground:light-dark(#1f2933,#e8edf2);
+      --muted:light-dark(#f0f3f5,#25303a);
+      --muted-foreground:light-dark(#52606d,#b7c4d0);
+      --border:light-dark(#cdd6df,#526171);
+      --primary:light-dark(#293c4b,#d9e5ef);
+      --primary-foreground:light-dark(#ffffff,#14212b);
+      --accent:light-dark(#e5edf3,#334454);
+      --accent-foreground:var(--foreground);
+      --ring:light-dark(#415d72,#a7c6df);
+      --red:light-dark(#bd2348,#fc7395);
+      --green:light-dark(#187143,#64d49a);
+      --orange:light-dark(#b6550b,#ffb366);
+      --blue:light-dark(#2455bf,#81adff);
+      --font-size-base:14px;
+    }
+    * { box-sizing:border-box; }
+    body { max-width:1080px; margin:0 auto; padding:24px; background:var(--background); color:var(--foreground); font:400 var(--font-size-base)/1.55 system-ui,"Segoe UI",sans-serif; }
+    h3 { font-weight:500; }
+    .text-small { font-size:12px; }
+    .text-muted { color:var(--muted-foreground); }
+    .viz-controls { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .form-select { font:inherit; max-width:100%; padding:9px 12px; color:var(--foreground); background:var(--background); border:1px solid var(--border); border-radius:6px; }
+    .btn { font:inherit; color:var(--foreground); background:var(--muted); border:1px solid transparent; border-radius:5px; padding:5px 8px; max-width:100%; white-space:normal; overflow-wrap:anywhere; }
+    .btn-ghost { background:transparent; }
+    .btn:hover { background:var(--accent); color:var(--accent-foreground); }
+    button:focus-visible,select:focus-visible,summary:focus-visible { outline:2px solid var(--ring); outline-offset:3px; }
+    summary { padding:6px 0; }
+    li { margin-bottom:6px; }
+    @media(max-width:450px) { body { padding:12px; } .btn { min-height:44px; } .form-select { font-size:16px; } }
+  </style>
+</head>
+<body>
+__MODEL_FLOW_FRAGMENT__
+</body>
+</html>

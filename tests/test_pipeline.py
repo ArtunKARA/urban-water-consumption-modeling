@@ -16,6 +16,7 @@ from urban_water.ingestion import (
     retry,
     work_once,
 )
+from urban_water.leases import renew
 from urban_water.processing import summarize
 from urban_water.registry import seed_synthetic, stable_id
 from urban_water.storage import FileStore, ObjectCorrupt
@@ -126,6 +127,7 @@ def test_crash_resume_and_stale_worker_fencing(settings, source_file):
         conn.execute("UPDATE job SET lease_until=clock_timestamp()-interval '1 second'")
     second = claim(settings)
     assert second["checkpoint"] == 1 and second["token"] != first["token"]
+    assert not renew(settings, first)
     with pytest.raises(LostLease):
         process(settings, first)
     assert process(settings, second)["accepted_rows"] == 3

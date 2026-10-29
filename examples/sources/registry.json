@@ -1,0 +1,12 @@
+{
+  "format": "urban-water.registry.v1",
+  "entries": [
+    {
+      "household_code": "DEMO-H01",
+      "meter_code": "DEMO-M01",
+      "stream_code": "DEMO-S01",
+      "kind": "interval",
+      "valid_from": "2026-01-01T00:00:00+03:00"
+    }
+  ]
+}

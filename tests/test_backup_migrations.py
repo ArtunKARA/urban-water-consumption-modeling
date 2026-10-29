@@ -18,15 +18,15 @@ def test_migration_upgrade_preserves_data_and_rejects_edits(settings, source_fil
     assert work_once(settings)["state"] == "succeeded"
     directory = tmp_path / "migrations"
     shutil.copytree(PROJECT_ROOT / "migrations", directory)
-    (directory / "004_test_upgrade.sql").write_text(
+    (directory / "006_test_upgrade.sql").write_text(
         "ALTER TABLE uw.study ADD COLUMN test_upgrade integer NOT NULL DEFAULT 7;"
     )
-    assert migrate(settings, directory) == ["004_test_upgrade.sql"]
+    assert migrate(settings, directory) == ["006_test_upgrade.sql"]
     assert migrate(settings, directory) == []
     with connect(settings) as conn:
         assert conn.execute("SELECT count(*) AS n FROM measurement").fetchone()["n"] == 1
         assert conn.execute("SELECT test_upgrade FROM study").fetchone()["test_upgrade"] == 7
-    (directory / "004_test_upgrade.sql").write_text("SELECT 1;")
+    (directory / "006_test_upgrade.sql").write_text("SELECT 1;")
     with pytest.raises(ValueError, match="applied migration changed"):
         migrate(settings, directory)
 

@@ -1,0 +1,205 @@
+<div id="uw-model-flow">
+  <style>
+    #uw-model-flow { color:var(--foreground); }
+    #uw-model-flow h3 { margin:0 100px 14px 0; }
+    #uw-model-flow .flow-legend { display:flex; flex-wrap:wrap; gap:8px 18px; margin:14px 0; }
+    #uw-model-flow .flow-legend span { display:inline-flex; align-items:center; gap:6px; }
+    #uw-model-flow .flow-dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+    #uw-model-flow .flow-dot.source { background:var(--red); }
+    #uw-model-flow .flow-dot.data { background:var(--green); }
+    #uw-model-flow .flow-dot.model { background:var(--orange); }
+    #uw-model-flow .flow-dot.output { background:var(--blue); }
+    #uw-model-flow .flow-graph { position:relative; padding:6px 0; isolation:isolate; }
+    #uw-model-flow .flow-connectors { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:-1; overflow:visible; }
+    #uw-model-flow .flow-sources { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,205px),1fr)); gap:22px; }
+    #uw-model-flow .flow-source-group { min-width:0; }
+    #uw-model-flow .flow-node { background:var(--background); padding:10px 12px; border:1px solid var(--border); border-radius:9px; overflow-wrap:anywhere; color:var(--foreground); min-width:0; }
+    #uw-model-flow .flow-source-node { background:color-mix(in srgb,var(--red) 12%,var(--background)); margin:0 16px; }
+    #uw-model-flow .flow-fields { display:grid; grid-template-columns:minmax(0,1fr); gap:12px; margin:24px 16px 0; }
+    #uw-model-flow .flow-field { background:color-mix(in srgb,var(--green) 12%,var(--background)); }
+    #uw-model-flow .flow-field[data-role="context"], #uw-model-flow .flow-field[data-role="gate"] { border-style:dashed; }
+    #uw-model-flow .flow-field[aria-current="true"] { outline:2px solid var(--ring); outline-offset:2px; }
+    #uw-model-flow .flow-node small { display:block; }
+    #uw-model-flow .flow-central { display:grid; justify-items:center; gap:32px; margin-top:52px; }
+    #uw-model-flow .flow-model-node { background:color-mix(in srgb,var(--orange) 15%,var(--background)); width:min(100%,480px); box-sizing:border-box; text-align:center; }
+    #uw-model-flow .flow-output-node { background:color-mix(in srgb,var(--blue) 12%,var(--background)); width:min(100%,560px); box-sizing:border-box; text-align:center; }
+    #uw-model-flow .flow-central strong { font-weight:500; }
+    #uw-model-flow .flow-selection { margin:16px 0; overflow-wrap:anywhere; min-height:24px; }
+    #uw-model-flow .flow-plan { margin-top:20px; }
+    #uw-model-flow dl { display:grid; grid-template-columns:minmax(95px,1fr) 4fr; gap:10px 16px; margin:14px 0; }
+    #uw-model-flow dt { font-weight:500; }
+    #uw-model-flow dd { margin:0; overflow-wrap:anywhere; }
+    #uw-model-flow details { margin:12px 0; }
+    #uw-model-flow summary { font-weight:500; }
+    #uw-model-flow .flow-inventory-group { margin:18px 0; }
+    #uw-model-flow .flow-inventory-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr)); gap:8px; margin-top:10px; }
+    @media (max-width:450px) {
+      #uw-model-flow .flow-sources { grid-template-columns:1fr; gap:30px; }
+      #uw-model-flow dl { grid-template-columns:1fr; gap:4px; }
+      #uw-model-flow dd { margin-bottom:10px; }
+    }
+  </style>
+  <h3>Kaynak → alan → model → çıktı</h3>
+  <div class="viz-controls">
+    <label class="form-label" for="uw-flow-model">Model akışı</label>
+    <select id="uw-flow-model" class="form-select" aria-label="Model akışı"></select>
+  </div>
+  <div class="flow-legend text-small" aria-label="Renk ve bağlantı sözlüğü">
+    <span><i class="flow-dot source" aria-hidden="true"></i>Kaynak</span>
+    <span><i class="flow-dot data" aria-hidden="true"></i>Veri alanı</span>
+    <span><i class="flow-dot model" aria-hidden="true"></i>Model / analiz</span>
+    <span><i class="flow-dot output" aria-hidden="true"></i>Çıktı</span>
+    <span>— Temel girdi</span><span>┄ Aday bağlam / kontrol</span>
+  </div>
+  <div id="uw-flow-graph" class="flow-graph" role="group" aria-label="Seçili modelin kaynak ve alan bağlantıları"></div>
+  <div id="uw-flow-selection" class="flow-selection text-small" aria-live="polite"></div>
+  <details class="flow-plan">
+    <summary>İlk deneme planı · eğitim çalıştırılmadı</summary>
+    <dl id="uw-flow-plan"></dl>
+  </details>
+  <details id="uw-flow-review-box">
+    <summary>Yorum / değerlendirme alanları · eğitim girdisi değil</summary>
+    <div id="uw-flow-review"></div>
+  </details>
+  <details>
+    <summary>Planlanan kaynak ve alan envanteri</summary>
+    <div id="uw-flow-inventory"></div>
+  </details>
+  <details>
+    <summary>Ortak veri ve eğitim koşulları</summary>
+    <ul id="uw-flow-controls"></ul>
+  </details>
+  <script id="uw-flow-data" type="application/json">__MODEL_FLOW_DATA__</script>
+  <script>
+    (() => {
+      const root = document.getElementById('uw-model-flow');
+      const map = JSON.parse(root.querySelector('#uw-flow-data').textContent);
+      const select = root.querySelector('#uw-flow-model');
+      const graph = root.querySelector('#uw-flow-graph');
+      const detail = root.querySelector('#uw-flow-selection');
+      const plan = root.querySelector('#uw-flow-plan');
+      const review = root.querySelector('#uw-flow-review');
+      const inventory = root.querySelector('#uw-flow-inventory');
+      const roles = {feature:'Temel özellik', context:'Aday bağlam', gate:'Veri uygunluk kontrolü', review:'Yorum / değerlendirme'};
+      const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      let selected = map.initial_model;
+      let selectedField = null;
+      let resizePending = false;
+      const saved = window.openai?.widgetState;
+      if (map.models.some(m => m.id === saved?.modelContent?.model_id)) selected = saved.modelContent.model_id;
+      if (Object.hasOwn(map.fields,saved?.modelContent?.field_id)) selectedField = saved.modelContent.field_id;
+
+      select.innerHTML = map.models.map(m => `<option value="${esc(m.id)}">${esc(m.id)} · ${esc(m.label)}</option>`).join('');
+      select.value = selected;
+      root.querySelector('#uw-flow-controls').innerHTML = map.global_controls.map(c => `<li>${esc(c)}</li>`).join('');
+
+      function persist() {
+        if (window.openai?.setWidgetState) window.openai.setWidgetState({
+          modelContent:{model_id:selected,field_id:selectedField}, privateContent:null
+        }).catch(() => {});
+      }
+      function fieldMarkup(id, role, prefix) {
+        const field = map.fields[id];
+        return `<div class="flow-node flow-field" data-field-id="${esc(id)}" data-role="${esc(role)}" id="${prefix}-${esc(id)}">
+          <div>${esc(field.label)}</div>
+          <div class="viz-row"><button type="button" class="btn btn-ghost" data-field-select="${esc(id)}" aria-label="${esc(field.label)} bağlantılarını incele">${id.length <= 5 ? esc(id) : 'Seç'}</button>
+          <small class="text-small">${esc(id)} · ${esc(roles[role] || 'Kaynak alanı')}</small></div></div>`;
+      }
+      function describeField(id) {
+        if (!Object.hasOwn(map.fields,id)) return;
+        selectedField = id;
+        const field = map.fields[id];
+        const model = map.models.find(m => m.id === selected);
+        const use = model.inputs.find(pair => pair[0] === id);
+        const conditions = model.variants.filter(v => v.gate_fields.includes(id)).map(v => v.label);
+        const condition = model.optional_gates.includes(id) ? 'Varsa kullanılan ek kanıt' :
+          (conditions.length ? 'Yalnız: '+conditions.join(', ') : '');
+        const links = map.models.filter(m => m.inputs.some(pair => pair[0] === id)).map(m => m.id).join(', ');
+        detail.textContent = `${id} · ${field.label} · ${roles[use?.[1]] || 'Bu modelde kullanılmıyor'}${condition ? ' · '+condition : ''} · Bağlantılar: ${links || 'Ortak kaynak kontrolü'}`;
+        root.querySelectorAll('[data-field-id]').forEach(el => el.setAttribute('aria-current', String(el.dataset.fieldId === id)));
+        draw();
+      }
+      function renderInventory() {
+        inventory.innerHTML = Object.entries(map.sources).map(([id, source]) => {
+          const entries = Object.entries(map.fields).filter(([, f]) => f.source === id);
+          return `<section class="flow-inventory-group"><div class="flow-node flow-source-node">${esc(source.label)}<small class="text-small">${esc(source.status)}</small></div>
+            <div class="flow-inventory-grid">${entries.map(([fid]) => fieldMarkup(fid, '', 'inventory')).join('')}</div></section>`;
+        }).join('');
+      }
+      function render() {
+        const model = map.models.find(m => m.id === selected);
+        const active = model.inputs.filter(([, role]) => role !== 'review');
+        const sourceIds = [...new Set(active.map(([id]) => map.fields[id].source))];
+        graph.innerHTML = `<svg class="flow-connectors" aria-hidden="true"></svg>
+          <div class="flow-sources">${sourceIds.map(id => {
+            const source = map.sources[id];
+            const fields = active.filter(([fid]) => map.fields[fid].source === id);
+            return `<section class="flow-source-group"><div id="source-${esc(id)}" class="flow-node flow-source-node">${esc(source.label)}</div>
+              <div class="flow-fields">${fields.map(([fid, role]) => fieldMarkup(fid, role, 'field')).join('')}</div></section>`;
+          }).join('')}</div>
+          <div class="flow-central"><div class="flow-node flow-model-node" id="flow-model-node"><strong>${esc(model.id)} · ${esc(model.label)}</strong><small class="text-small">${esc(model.stage)}</small></div>
+          <div class="flow-node flow-output-node" id="flow-output-node"><strong>${esc(model.question)}</strong><small class="text-small">${model.outputs.map(esc).join(' · ')}</small></div></div>`;
+        const variants = model.variants.map(v => v.label+(v.gate_fields.length ? ' [ek kontrol: '+v.gate_fields.join(', ')+']' : '')).join(' · ');
+        const entries = [['Yöntem',model.algorithm],['Karşılaştırma',model.baseline],['Varyantlar',variants],['Çıktı ailesi',model.output_family],['Öğrenilecek hedef',model.target],['Başarı ölçümü',model.metrics],['Veri bölmesi',model.split],['Gereken veri',model.requires],['Açık karar',model.open]];
+        if (model.experiment_design) entries.unshift(['Kararlaştırılan deney',model.experiment_design.label]);
+        plan.innerHTML = entries.map(([key,value]) => `<dt>${esc(key)}</dt><dd>${esc(value)}</dd>`).join('');
+        const reviews = model.inputs.filter(([,role]) => role === 'review');
+        review.innerHTML = reviews.map(([id, role]) => fieldMarkup(id, role, 'review')).join('');
+        root.querySelector('#uw-flow-review-box').hidden = reviews.length === 0;
+        if (selectedField && Object.hasOwn(map.fields,selectedField)) describeField(selectedField);
+        else detail.textContent = `${model.id} · ${model.kind === 'learned' ? 'Öğrenilmiş model adayı' : 'Kural / analitik / koşullu akış'} · Plan aşamasında`;
+        requestAnimationFrame(draw);
+      }
+      function draw() {
+        const svg = graph.querySelector('.flow-connectors');
+        if (!svg) return;
+        const box = graph.getBoundingClientRect();
+        if (!box.width || !box.height) return;
+        svg.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
+        const model = map.models.find(m => m.id === selected);
+        const center = graph.querySelector('#flow-model-node').getBoundingClientRect();
+        const output = graph.querySelector('#flow-output-node').getBoundingClientRect();
+        let paths = '<defs><marker id="uw-flow-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/></marker></defs>';
+        const path = (x1,y1,x2,y2,dashed,emphasis) => {
+          const bend = Math.max(14,(y2-y1)*0.45);
+          return `<path d="M ${x1} ${y1} C ${x1} ${y1+bend}, ${x2} ${y2-bend}, ${x2} ${y2}" fill="none" stroke="currentColor" stroke-width="${emphasis ? 2 : 1}" opacity="${emphasis ? 0.9 : 0.25}" ${dashed ? 'stroke-dasharray="5 4"' : ''} marker-end="url(#uw-flow-arrow)"/>`;
+        };
+        for (const [id,role] of model.inputs) {
+          if (role === 'review') continue;
+          const field = graph.querySelector(`#field-${id}`).getBoundingClientRect();
+          const source = graph.querySelector(`#source-${map.fields[id].source}`).getBoundingClientRect();
+          const emphasis = id === selectedField;
+          const group = graph.querySelector(`#field-${id}`).closest('.flow-source-group').getBoundingClientRect();
+          const y = field.top+field.height/2-box.top;
+          const leftChannel = group.left-box.left+3;
+          const rightChannel = group.right-box.left-3;
+          const centerX = center.left+center.width/2-box.left;
+          const centerY = center.top-box.top;
+          const attrs = `fill="none" stroke="currentColor" stroke-width="${emphasis ? 2 : 1}" opacity="${emphasis ? 0.9 : 0.35}" marker-end="url(#uw-flow-arrow)"`;
+          paths += `<path d="M ${source.left-box.left+8} ${source.bottom-box.top} H ${leftChannel} V ${y} H ${field.left-box.left}" ${attrs}/>`;
+          paths += `<path d="M ${field.right-box.left} ${y} H ${rightChannel} V ${centerY-28} C ${rightChannel} ${centerY-10}, ${centerX} ${centerY-24}, ${centerX} ${centerY}" ${attrs} ${role !== 'feature' ? 'stroke-dasharray="5 4"' : ''}/>`;
+        }
+        paths += path(center.left+center.width/2-box.left,center.bottom-box.top,output.left+output.width/2-box.left,output.top-box.top,false,true);
+        svg.innerHTML = paths;
+      }
+      select.addEventListener('change', () => { selected=select.value; selectedField=null; render(); persist(); });
+      root.addEventListener('click', event => {
+        const button = event.target.closest('[data-field-select]');
+        if (button) { describeField(button.dataset.fieldSelect); persist(); }
+      });
+      window.addEventListener('openai:set_globals', event => {
+        const state=event.detail?.globals?.widgetState?.modelContent;
+        if (map.models.some(m => m.id === state?.model_id)) {
+          selected=state.model_id;
+          selectedField=Object.hasOwn(map.fields,state.field_id) ? state.field_id : null;
+          select.value=selected; render();
+        }
+      });
+      new ResizeObserver(() => {
+        if (!resizePending) { resizePending=true; requestAnimationFrame(() => {resizePending=false; draw();}); }
+      }).observe(graph);
+      renderInventory();
+      render();
+    })();
+  </script>
+</div>

@@ -1,4 +1,4 @@
-"""Durable acceptance and fenced, resumable synthetic JSONL ingestion."""
+"""Durable, fenced ingestion shared by configured file and HTTP sources."""
 
 import gzip
 import hashlib
@@ -8,19 +8,26 @@ from decimal import Decimal, localcontext
 from pathlib import Path
 from uuid import uuid4
 
-from pydantic import ValidationError
+import psycopg
+from psycopg.types.json import Jsonb
 from urban_water_contracts import Measurement
 
 from urban_water.db import connect
+from urban_water.leases import LostLease, keep_lease, owned
 from urban_water.settings import Settings
+from urban_water.sources.config import SourceSpec, options_digest
+from urban_water.sources.normalizers import (
+    NormalizationError,
+    NormalizedRow,
+    get_normalizer,
+    parse_json,
+    qualify,
+)
+from urban_water.sources.registration import ensure_environment
 from urban_water.storage import FileStore
 
 CONTRACT = "synthetic.measurement.v1"
 PARSER = "synthetic-jsonl/1"
-
-
-class LostLease(RuntimeError):
-    pass
 
 
 class SourceConflict(ValueError):
@@ -31,21 +38,52 @@ class SourceLimit(ValueError):
     pass
 
 
-def accept(settings: Settings, path: Path) -> dict:
+def accept(settings: Settings, path: Path, *, source: SourceSpec | None = None) -> dict:
+    contract = source.contract if source else CONTRACT
+    parser = source.parser if source else PARSER
+    namespace = source.namespace if source else "legacy"
+    options = json.loads(json.dumps(source.options)) if source else {}
+    digest_options = options_digest(options)
+    if (source.data_kind if source else "synthetic") != settings.environment:
+        raise ValueError("source data kind must match the runtime environment")
+    get_normalizer(contract, parser, options)  # Reject unknown versions before accepting bytes.
+    acquisition = {
+        "reader_version": "http-file/1"
+        if source and source.reader == "http_file_v1"
+        else "local-file/1",
+        "data_kind": source.data_kind if source else "synthetic",
+        "citation": source.citation if source else None,
+        "license": source.license if source else None,
+    }
     digest, size, key = FileStore(settings).put(path)
     with connect(settings) as conn:
+        conn.execute("SELECT pg_advisory_xact_lock(83621002)")
+        ensure_environment(conn, settings)
         source_id = uuid4()
         row = conn.execute(
             "INSERT INTO source(id,sha256,byte_size,object_key,"
-            "contract_version,parser_version,state) "
-            "VALUES (%s,%s,%s,%s,%s,%s,'accepted') ON CONFLICT DO NOTHING RETURNING id",
-            (source_id, digest, size, key, CONTRACT, PARSER),
+            "contract_version,parser_version,namespace,normalizer_options,options_sha256,"
+            "acquisition,state) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'accepted') "
+            "ON CONFLICT DO NOTHING RETURNING id",
+            (
+                source_id,
+                digest,
+                size,
+                key,
+                contract,
+                parser,
+                namespace,
+                Jsonb(options),
+                digest_options,
+                Jsonb(acquisition),
+            ),
         ).fetchone()
         if row is None:
             row = conn.execute(
                 "SELECT id FROM source WHERE sha256=%s "
-                "AND contract_version=%s AND parser_version=%s",
-                (digest, CONTRACT, PARSER),
+                "AND contract_version=%s AND parser_version=%s AND namespace=%s "
+                "AND options_sha256=%s",
+                (digest, contract, parser, namespace, digest_options),
             ).fetchone()
             return {"source_id": str(row["id"]), "duplicate": True}
         conn.execute(
@@ -83,9 +121,16 @@ def claim(settings: Settings) -> dict | None:
         if row is None:
             return None
         token = uuid4()
+        if not row["configurations_pinned"]:
+            conn.execute(
+                """INSERT INTO job_configuration(job_id,configuration_id)
+                SELECT %s,id FROM stream_configuration WHERE retired_at IS NULL""",
+                (row["id"],),
+            )
         conn.execute(
             """UPDATE job SET state='running', attempts=attempts+1, token=%s,
-            lease_until=clock_timestamp() + %s * interval '1 second', error_code=NULL
+            lease_until=clock_timestamp() + %s * interval '1 second', error_code=NULL,
+            configurations_pinned=true
             WHERE id=%s""",
             (token, settings.lease_seconds, row["id"]),
         )
@@ -95,18 +140,6 @@ def claim(settings: Settings) -> dict | None:
         )
         row.update(token=token, attempts=row["attempts"] + 1, state="running")
         return row
-
-
-def owned(conn, job: dict) -> None:
-    if (
-        conn.execute(
-            """SELECT id FROM job WHERE id=%s AND token=%s AND state='running'
-        AND lease_until > clock_timestamp() FOR UPDATE""",
-            (job["id"], job["token"]),
-        ).fetchone()
-        is None
-    ):
-        raise LostLease("worker no longer owns the job")
 
 
 def _fingerprint(record: Measurement) -> str:
@@ -123,16 +156,34 @@ def _fingerprint(record: Measurement) -> str:
 
 
 def _stage_chunk(settings: Settings, job: dict, lines: list[tuple[int, bytes]], last: int) -> None:
+    """Compatibility entry point for legacy callers and checkpoint regressions."""
+    rows = []
+    for number, line in lines:
+        try:
+            rows.append(NormalizedRow(number, parse_json(line)))
+        except ValueError:
+            rows.append(NormalizedRow(number, None, "invalid_contract"))
+    _stage_rows(settings, job, rows, last)
+
+
+def _stage_rows(settings: Settings, job: dict, rows: list[NormalizedRow], last: int) -> None:
     with connect(settings) as conn:
         owned(conn, job)
         streams = {r["code"]: r for r in conn.execute("SELECT * FROM stream")}
+        configurations = {}
+        for cfg in conn.execute(
+            """SELECT c.* FROM stream_configuration c
+            JOIN job_configuration j ON j.configuration_id=c.id WHERE j.job_id=%s
+            ORDER BY c.valid_from,c.version""",
+            (job["id"],),
+        ):
+            configurations.setdefault(cfg["stream_id"], []).append(cfg)
         prepared = []
         issues = []
-        for row_no, line in lines:
-            try:
-                record = Measurement.model_validate_json(line)
-            except (ValidationError, ValueError):
-                issues.append((job["source_id"], row_no, "invalid_contract"))
+        for item in rows:
+            row_no, record = item.number, item.record
+            if record is None:
+                issues.append((job["source_id"], row_no, item.issue or "invalid_contract"))
                 continue
             stream = streams.get(record.stream_code)
             code = None
@@ -140,10 +191,19 @@ def _stage_chunk(settings: Settings, job: dict, lines: list[tuple[int, bytes]], 
                 code = "unknown_stream"
             elif stream["kind"] != record.kind:
                 code = "stream_kind_mismatch"
-            elif record.occurred_at < stream["valid_from"] or (
-                stream["valid_to"] is not None and record.occurred_at >= stream["valid_to"]
-            ):
-                code = "outside_stream_configuration"
+            cfg = None
+            if code is None:
+                candidates = [
+                    c for c in configurations.get(stream["id"], ()) if _covered(record, c)
+                ]
+                if candidates:
+                    # An end-index at an adjacent boundary closes the preceding period.
+                    cfg = min(
+                        candidates,
+                        key=lambda c: (c["valid_to"] != record.occurred_at, -c["version"]),
+                    )
+                else:
+                    code = "outside_stream_configuration"
             # Registry mapping is applied by event time during analysis, not receipt time.
             if code:
                 issues.append((job["source_id"], row_no, code))
@@ -151,7 +211,7 @@ def _stage_chunk(settings: Settings, job: dict, lines: list[tuple[int, bytes]], 
             with localcontext() as context:
                 context.prec = 60
                 liters = record.value * (
-                    stream["liters_per_pulse"]
+                    cfg["liters_per_pulse"]
                     if record.kind == "pulse"
                     else Decimal(1000)
                     if record.unit == "m3"
@@ -177,15 +237,21 @@ def _stage_chunk(settings: Settings, job: dict, lines: list[tuple[int, bytes]], 
                     record.unit,
                     liters,
                     _fingerprint(record),
+                    cfg["id"],
                 ),
             )
         with conn.cursor() as cursor:
             if prepared:
-                with cursor.copy("COPY staged_measurement FROM STDIN") as copy:
+                with cursor.copy("""COPY staged_measurement(source_id,row_no,stream_id,event_id,
+                    revision,kind,occurred_at,interval_start,received_at,original_time,
+                    original_value,original_unit,liters,fingerprint,configuration_id)
+                    FROM STDIN""") as copy:
                     for row in prepared:
                         copy.write_row(row)
             if issues:
-                with cursor.copy("COPY staged_quality_issue FROM STDIN") as copy:
+                with cursor.copy(
+                    "COPY staged_quality_issue(source_id,row_no,code) FROM STDIN"
+                ) as copy:
                     for row in issues:
                         copy.write_row(row)
         conn.execute(
@@ -193,6 +259,16 @@ def _stage_chunk(settings: Settings, job: dict, lines: list[tuple[int, bytes]], 
             lease_until=clock_timestamp() + %s * interval '1 second' WHERE id=%s""",
             (last, settings.lease_seconds, job["id"]),
         )
+
+
+def _covered(record: Measurement, config: dict) -> bool:
+    start = record.interval_start if record.kind == "interval" else record.occurred_at
+    if start < config["valid_from"]:
+        return False
+    end = config["valid_to"]
+    if end is None:
+        return True
+    return record.occurred_at < end if record.kind == "pulse" else record.occurred_at <= end
 
 
 def publish(settings: Settings, job: dict) -> None:
@@ -213,7 +289,7 @@ def publish(settings: Settings, job: dict) -> None:
         conflict = conn.execute(
             """SELECT 1 FROM staged_measurement s JOIN measurement m
             USING(stream_id,event_id,revision) WHERE s.source_id=%s
-            AND s.fingerprint <> m.fingerprint LIMIT 1""",
+            AND (s.fingerprint <> m.fingerprint OR s.liters <> m.liters) LIMIT 1""",
             (sid,),
         ).fetchone()
         if bad or conflict:
@@ -253,9 +329,11 @@ def publish(settings: Settings, job: dict) -> None:
             raise SourceConflict("overlapping intervals or ambiguous index timestamps")
         conn.execute(
             """INSERT INTO measurement(stream_id,event_id,revision,kind,occurred_at,
-            interval_start,original_time,original_value,original_unit,liters,fingerprint)
+            interval_start,original_time,original_value,original_unit,liters,fingerprint,
+            configuration_id)
             SELECT DISTINCT ON (stream_id,event_id,revision) stream_id,event_id,revision,kind,
-                occurred_at,interval_start,original_time,original_value,original_unit,liters,fingerprint
+                occurred_at,interval_start,original_time,original_value,original_unit,liters,
+                fingerprint,configuration_id
             FROM staged_measurement WHERE source_id=%s
             ORDER BY stream_id,event_id,revision,row_no ON CONFLICT DO NOTHING""",
             (sid,),
@@ -269,7 +347,8 @@ def publish(settings: Settings, job: dict) -> None:
         )
         conn.execute("DELETE FROM quality_issue WHERE source_id=%s", (sid,))
         conn.execute(
-            "INSERT INTO quality_issue SELECT * FROM staged_quality_issue WHERE source_id=%s",
+            "INSERT INTO quality_issue(source_id,row_no,code) "
+            "SELECT source_id,row_no,code FROM staged_quality_issue WHERE source_id=%s",
             (sid,),
         )
         conn.execute("DELETE FROM staged_quality_issue WHERE source_id=%s", (sid,))
@@ -300,31 +379,39 @@ def fail(settings: Settings, job: dict, code: str, permanent: bool = False) -> N
 
 
 def process(settings: Settings, job: dict) -> dict:
+    with keep_lease(settings, job):
+        return _process(settings, job)
+
+
+def _process(settings: Settings, job: dict) -> dict:
     with connect(settings) as conn:
         source = conn.execute("SELECT * FROM source WHERE id=%s", (job["source_id"],)).fetchone()
-    if source["contract_version"] != CONTRACT or source["parser_version"] != PARSER:
-        raise SourceConflict("unsupported source contract or parser")
+    if source["options_sha256"] != options_digest(source["normalizer_options"]):
+        raise SourceConflict("source mapping checksum mismatch")
+    if source["acquisition"].get("data_kind") != settings.environment:
+        raise SourceConflict("source environment does not match worker environment")
+    normalizer = get_normalizer(
+        source["contract_version"], source["parser_version"], source["normalizer_options"]
+    )
     store = FileStore(settings)
     store.verify(source["object_key"], source["sha256"], source["byte_size"])
     chunk = []
     row_no = 0
     with gzip.open(store.path(source["object_key"]), "rb") as incoming:
-        while line := incoming.readline(settings.max_line_bytes + 1):
-            row_no += 1
-            if row_no > settings.max_records:
-                raise SourceLimit("source record limit exceeded")
-            if len(line) > settings.max_line_bytes:
-                raise SourceLimit("source line limit exceeded")
+        for item in normalizer.rows(incoming, settings.max_line_bytes, settings.max_records):
+            row_no = item.number
             if row_no <= job["checkpoint"]:
                 continue
-            chunk.append((row_no, line))
+            if item.record is not None:
+                item = NormalizedRow(row_no, qualify(item.record, source["namespace"]))
+            chunk.append(item)
             if len(chunk) >= settings.chunk_size:
-                _stage_chunk(settings, job, chunk, row_no)
+                _stage_rows(settings, job, chunk, row_no)
                 chunk = []
     if row_no == 0:
         raise SourceConflict("empty source")
     if chunk:
-        _stage_chunk(settings, job, chunk, row_no)
+        _stage_rows(settings, job, chunk, row_no)
     publish(settings, job)
     with connect(settings) as conn:
         issues = conn.execute(
@@ -343,19 +430,31 @@ def process(settings: Settings, job: dict) -> dict:
 
 
 def work_once(settings: Settings) -> dict:
-    job = claim(settings)
+    try:
+        job = claim(settings)
+    except (psycopg.OperationalError, psycopg.InterfaceError):
+        return {"state": "connection_unavailable"}
     if job is None:
         return {"state": "idle"}
     try:
         return process(settings, job)
     except LostLease:
         return {"job_id": str(job["id"]), "state": "lease_lost"}
+    except (psycopg.OperationalError, psycopg.InterfaceError):
+        return {"job_id": str(job["id"]), "state": "connection_unavailable"}
     except Exception as exc:
         code = type(exc).__name__
         try:
-            fail(settings, job, code, isinstance(exc, (SourceConflict, SourceLimit)))
+            fail(
+                settings,
+                job,
+                code,
+                isinstance(exc, (SourceConflict, SourceLimit, NormalizationError)),
+            )
         except LostLease:
             return {"job_id": str(job["id"]), "state": "lease_lost"}
+        except (psycopg.OperationalError, psycopg.InterfaceError):
+            return {"job_id": str(job["id"]), "state": "connection_unavailable"}
         return {"job_id": str(job["id"]), "state": "failed_attempt", "error_code": code}
 
 
@@ -376,9 +475,11 @@ def retry(settings: Settings, source_id: str) -> None:
             raise ValueError("clean source requires a new parser version or corrected source")
         conn.execute("DELETE FROM staged_measurement WHERE source_id=%s", (source_id,))
         conn.execute("DELETE FROM staged_quality_issue WHERE source_id=%s", (source_id,))
+        conn.execute("DELETE FROM job_configuration WHERE job_id=%s", (row["id"],))
         conn.execute(
             "UPDATE job SET state='queued',max_attempts=attempts+%s,checkpoint=0,"
-            "available_at=clock_timestamp(),error_code=NULL WHERE id=%s",
+            "available_at=clock_timestamp(),error_code=NULL,configurations_pinned=false "
+            "WHERE id=%s",
             (settings.max_attempts, row["id"]),
         )
         conn.execute(

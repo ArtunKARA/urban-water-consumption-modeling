@@ -32,7 +32,9 @@ iddiası taşımaz. Truth ayrı dosyadadır; core tarafından okunmaz.
 
 `uw-worker` parametresiz çalışırsa kalıcı kuyrukta yeni işleri bekler; Ctrl+C ile durur.
 Batch ve sürekli çalışan worker aynı işleme kodunu kullanır. Yeni paket kabulü
-`uw ingest DOSYA` ile yapılır; gerçek API/cihaz adaptörü bu sürümün kapsamına dahil değildir.
+`uw ingest DOSYA` ile yapılır. Yapılandırılan yerel/HTTP sayaç kaynağı için
+`uw collect` ve [çalışan kaynak örnekleri](docs/source-adapters-usage.md) vardır;
+sağlayıcıya özel gerçek API/cihaz adaptörü bu sürümün kapsamına dahil değildir.
 
 ```powershell
 # Aynı dosya ikinci kez kabul edildiğinde duplicate=true; tüketim artmaz.
@@ -94,13 +96,24 @@ Notebook yalnızca core'u çağırır; veri hazırlama mantığı kopyalamaz.
 
 ## Belgeler ve kapsam
 
+- [Kaynak → veri → ilişki → model → çıktı diyagramları — v0.1 taslak](docs/contracts/research-data-model.md)
+- [Model seçerek renkli akışları incele](docs/contracts/model-flow-map.html)
+- [Tüm model akışları tek grafikte — SVG](docs/contracts/model-flow-overview.svg) · [PNG](docs/contracts/model-flow-overview.png) · [A3 PDF](docs/contracts/model-flow-overview.pdf)
+- [Model başına kaynak, alan ve ilk yöntem adayları](docs/contracts/model-flow-map.md)
+- [İlk model eğitim planı ve deney kartları — taslak](docs/contracts/model-training-plan.md)
+- [Veri/model akış haritası denetimi ve düzeltmeler](docs/contracts/model-flow-audit.md)
+- [Araştırma girdi/çıktı JSON sözleşmesi — v0.1 taslak](docs/contracts/research-data-contract.v0.1.schema.json)
 - [Mimari ve değişmezler](docs/architecture.md)
+- [Değiştirilebilir kaynaklar ve adaptör arabirimleri — tasarım](docs/source-adapters.md)
+- [Dosya/HTTP kaynak noktaları — çalışan kod ve kullanım](docs/source-adapters-usage.md)
+- [Sentetik veri → açık araştırma verisi → API geçiş planı](docs/research-data-bootstrap.md)
 - [Veri sözlüğü](docs/data-dictionary.md)
 - [Yedekleme, kurtarma ve işletim](docs/operations.md)
 - [Araştırma protokolleri](research/experiments/protocols.toml)
 - [Kabul doğrulaması](verification/README.md)
 - [İlk paket doğrulama sonuçları](docs/validation.md)
+- [On inceleme bulgusunun düzeltmeleri](docs/audit-fixes.md)
 
-Gerçek veri adaptörü, kapsamlı davranış simülatörü, üç makalenin model/dağıtık/formal
+Sağlayıcıya özel gerçek veri adaptörü, kapsamlı davranış simülatörü, üç makalenin model/dağıtık/formal
 deneyleri ve panel sonraki teslimatlardır. İlk gerçek veri geçişinden önce kurumun
 erişim, saklama ve sağlayıcı sözleşmesi koşulları tamamlanacaktır.

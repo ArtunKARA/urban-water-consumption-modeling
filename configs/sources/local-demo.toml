@@ -1,0 +1,20 @@
+# Working synthetic example. All paths are relative to this TOML, not the terminal cwd.
+[sources.meter_readings]
+namespace = "local-demo"
+family = "meter_measurements"
+data_kind = "synthetic"
+reader = "local_file_v1"
+normalizer = "mapped_csv_v1"
+path = "../../examples/sources/measurements.csv"
+
+[sources.meter_readings.fields]
+event_id = "reading_id"
+occurred_at = "period_end"
+interval_start = "period_start"
+received_at = "arrived_at"
+value = "volume_l"
+
+[sources.meter_readings.constants]
+stream_code = "DEMO-S01"
+kind = "interval"
+unit = "L"

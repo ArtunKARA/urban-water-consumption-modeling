@@ -1,0 +1,21 @@
+# Same namespace and mapping as local-demo: transport changes, event identity does not.
+# The endpoint must return the CSV bytes, not an HTML download page or JSON envelope.
+[sources.meter_readings]
+namespace = "local-demo"
+family = "meter_measurements"
+data_kind = "synthetic"
+reader = "http_file_v1"
+url_env = "UW_METER_URL"
+normalizer = "mapped_csv_v1"
+
+[sources.meter_readings.fields]
+event_id = "reading_id"
+occurred_at = "period_end"
+interval_start = "period_start"
+received_at = "arrived_at"
+value = "volume_l"
+
+[sources.meter_readings.constants]
+stream_code = "DEMO-S01"
+kind = "interval"
+unit = "L"

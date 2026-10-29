@@ -36,9 +36,14 @@ tanır. Temiz yayımlanmış kaynakta tekrar işlem yeni parser sürümüyle tan
 
 Dosya başına sınır, gzip açılmış özgün bayt sayısı üzerinden denetlenir. Kaynak
 önce hash/size ile doğrulanır; işlem sırasında parça parça okunup COPY ile staging'e
-yazılır. Checkpoint ve staging aynı transaction'da commit edilir. Lease dosya
-doğrulamasını ve bir chunk işlem süresini karşılayacak kadar uzun olmalıdır.
-Varsayılan 60 saniye küçük yerel paketler içindir; yavaş disk/kurum ağı için ölçün.
+yazılır. Checkpoint ve staging aynı transaction'da commit edilir. Dosya doğrulaması
+ve checkpoint'e kadar tarama boyunca ayrı heartbeat sahiplik token'ıyla lease'i
+yeniler. Süresi dolmuş, değiştirilmiş veya tamamlanmış token yenilenemez. Chunk ve
+yayın transaction'ları job satırını kilitler; heartbeat bu kilidin arkasında beklemez.
+DB bağlantıları 5 saniyelik bağlantı zaman aşımı kullanır. Sürekli worker geçici
+bağlantı hatasında artan, en fazla 30 saniyelik beklemeyle tekrar bağlanır.
+`--once` bağlantı hatasını sıfırdan farklı çıkış koduyla bildirir. Varsayılan lease
+60 saniyedir; büyük veri/kurum ağı için bağlantı ve işlem gecikmelerini ayrıca ölçün.
 
 Araştırma özetleri varsayılan `synthetic-pilot` study / `fixture` cohort içindir;
 `UW_STUDY_CODE` ve `UW_COHORT_CODE` ile seçilir. Membership dönemleri olay zamanında
@@ -77,8 +82,11 @@ PowerShell değişken ataması DSN'yi görüntülemez; komutu loglayan ortamlard
 secret yönetimini kullanın. Restore hedef DB adı `_restore` veya `_test` ile bitmeli,
 kaynak DB'den farklı ve boş olmalıdır. Hedef storage dizini de boş olmalıdır.
 Checksums DB yazımından önce doğrulanır; pg_restore tek transaction kullanır.
-Sonuçta tüm uw tablo sayıları ve özgün kaynak hash'leri karşılaştırılır. Test ayrıca
-gözlenen tüketim sonuçlarını ve dondurulmuş dataset'i karşılaştırır.
+Sonuçta tüm uw tablo sayıları, özgün kaynak hash'leri, dataset'in DB manifest'i,
+Parquet hash/satır sayısı ve varsa normalizasyon geçmişi doğrulanır. Yedekleme de
+dataset'leri hem kaynakta hem kopyalandıktan sonra DB snapshot'ındaki manifest'e
+göre denetler. Kopyanın güncel hash'ini almak, özgün dataset bütünlüğünün yerine geçmez.
+Test ayrıca gözlenen tüketim sonuçlarını ve dondurulmuş dataset'i karşılaştırır.
 
 Restore mevcut DB/dosya üzerine yazmaz. Kesintili restore'da dosyalar kalabilir;
 başarılı sayılmaz. Yeni boş DB/dizinle yeniden deneyin; başarısız alanı incelemeden
@@ -89,8 +97,48 @@ backup deposu ve erişim denetimi gerekir.
 
 `uw migrate` sıralı migration'ları tek transaction ve migration kilidiyle uygular.
 Uygulanmış dosya checksum'u değişmişse durur. Mevcut migration dosyasını değiştirmeyin;
-yeni numaralı migration ekleyin. İlk paket btree_gist gerektirir; kısıtlı kurum
+yeni numaralı migration ekleyin. Uygulanmış migration'lar sıralı dosya listesinin
+kesintisiz başlangıcını oluşturmalıdır; eski numaralı ekleme DDL'den önce reddedilir.
+SQL dosyaları `.gitattributes` ile LF tutulur. 004 geçişinden önce worker'ları durdurun;
+mevcut normalizasyon legacy katsayıyla çelişiyorsa migration geçmişi uydurmak yerine durur.
+İlk paket btree_gist gerektirir; kısıtlı kurum
 ortamında extension kurulumunu yetkili DB yöneticisi önceden yapmalıdır.
+
+## Sayaç konfigürasyonu
+
+`stream` kimliği ve legacy ilk ayarlar yerinde değiştirilemez. `stream_configuration`
+katsayı, tür ve geçerlilik dönemini sürümler. İş ilk claim sırasında etkin sürümleri
+sabitler; yeniden başlama aynı pin'leri kullanır. Yeni ayar açık işin anlamını değiştirmez.
+API atomik olarak eski etkin sürümleri emekliye ayırır, yeni dönemleri ekler. Örnek:
+
+```python
+from datetime import datetime
+from decimal import Decimal
+from urban_water.registry import ConfigurationPeriod, configure_stream
+
+configure_stream(
+    settings,
+    "S0001-pulse",
+    [
+        ConfigurationPeriod(
+            valid_from=datetime.fromisoformat("2000-01-01T00:00:00Z"),
+            liters_per_pulse=Decimal("0.2"),
+        )
+    ],
+)
+```
+
+Bitişli/ardışık dönemler aynı listede verilmelidir; etkin dönemler çakışamaz.
+Yeni işler yeni sürümleri kullanır. Yayınlanmış bir olayın hacmini düzeltmek için
+açık yeni olay revision'ı gerekir; aynı anahtarı başka katsayıyla yeniden göndermek
+eski sonucu sessizce değiştirmez. Kısmi/başarısız kaynakta `retry` staging ve pin'leri
+yeniden oluşturur; önceden yayımlanmış ölçümler ve frozen dataset'ler korunur.
+
+Pulse için bitiş hariçtir. Interval'in bütün `[start,end)` dönemi tek konfigürasyona
+sığmalıdır; end'in tam config bitişine eşit olması geçerlidir. Kümülatif endekste
+bitiş anındaki okuma kapanış referansı olarak kabul edilir; bitişik config'lerde
+bu örnek önceki dönemi kapatır. Gece yarısındaki DST tekrarında günlük başlangıç
+ilk gerçek gece yarısıdır; olmayan gece yarısında günün ilk gerçek anı seçilir.
 
 ## İlk sürümün işletim sınırları
 

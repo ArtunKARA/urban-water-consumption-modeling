@@ -21,7 +21,7 @@ urban-water-cli = { workspace = true }
 urban-water-worker = { workspace = true }
 
 [dependency-groups]
-dev = ["pytest>=8,<10", "ruff>=0.11,<1"]
+dev = ["pytest>=8,<10", "ruff>=0.11,<1", "jsonschema>=4,<5"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

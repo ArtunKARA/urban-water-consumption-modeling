@@ -39,3 +39,23 @@ sampling = "report initial/retained households and periods plus all exclusion re
 context = "effective time and knowledge time; preserve unknown/refused/not applicable separately"
 synthetic = "physical usage -> sensor -> transport; independent truth and seed/config/version manifests"
 success = "negative findings are valid; do not tune the generator to hit grant metric targets"
+
+[context_forecasting.daily_issuance]
+local_times = ["18:00", "23:00"]
+timezone = "Europe/Istanbul"
+target = "next local calendar day, same target household-days across both issuance experiments"
+features = "completed daily history plus observed intraday volume/elapsed-time/coverage before each as_of; no later revision/context in the earlier experiment"
+comparison = "separate fits/runs/reports; paired common eligible targets plus all exclusions; same target household-day belongs to the same split across times"
+
+[distributed_profiling.context_comparison]
+variants = ["consumption", "household"]
+meaning = "consumption-only clusters interpreted with survey context versus consumption-plus-household-context clusters"
+comparison = "same households/periods/splits; compare in a shared consumption space; within-space silhouette reported separately"
+execution = "local/distributed equivalence assessed within each variant, not between different feature spaces"
+
+[anomaly_verification.synthetic_scenarios]
+families = ["leak", "normal_behavior_change", "device_or_transport_fault"]
+normal_examples = ["guest", "vacancy"]
+fault_examples = ["dropout", "delay", "duplicate", "counter_reset"]
+evaluation = "separate scenario-family reports; normal changes and transport/device faults are not confirmed leak labels"
+isolation = "hidden scenario truth remains outside input features; faults use quality/coverage states from observable evidence only"

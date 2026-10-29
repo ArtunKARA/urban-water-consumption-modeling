@@ -11,6 +11,8 @@ from urban_water.ingestion import accept, retry
 from urban_water.processing import summarize
 from urban_water.registry import seed_synthetic
 from urban_water.settings import Settings
+from urban_water.sources import collect
+from urban_water.sources.registration import register_file
 from urban_water_contracts import Measurement
 from urban_water_simulator import generate
 
@@ -31,6 +33,11 @@ def main() -> None:
     simulator.add_argument("--seed", type=int, default=42)
     ingest = sub.add_parser("ingest")
     ingest.add_argument("source", type=Path)
+    collection = sub.add_parser("collect", help="Acquire a configured file/HTTP source point")
+    collection.add_argument("name")
+    collection.add_argument("--config", type=Path, required=True)
+    registration = sub.add_parser("register", help="Import explicit household/meter relationships")
+    registration.add_argument("source", type=Path)
     reprocess = sub.add_parser("retry")
     reprocess.add_argument("source_id")
     for name in ("summarize", "freeze"):
@@ -59,6 +66,10 @@ def main() -> None:
                 result = {"seeded": args.households, "kind": args.kind}
             elif args.command == "ingest":
                 result = accept(settings, args.source)
+            elif args.command == "collect":
+                result = collect(settings, args.config, args.name)
+            elif args.command == "register":
+                result = register_file(settings, args.source)
             elif args.command == "retry":
                 retry(settings, args.source_id)
                 result = {"requeued": args.source_id}

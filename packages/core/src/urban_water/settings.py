@@ -21,8 +21,11 @@ class Settings:
     max_source_bytes: int = 268435456
     max_line_bytes: int = 65536
     max_records: int = 2000000
+    environment: str = "synthetic"
 
     def __post_init__(self) -> None:
+        if self.environment not in {"synthetic", "public_research"}:
+            raise ValueError("only synthetic and public_research environments are supported")
         ZoneInfo(self.timezone)
         for name in (
             "lease_seconds",
@@ -38,10 +41,9 @@ class Settings:
     @classmethod
     def from_env(cls) -> "Settings":
         load_dotenv(override=False)
-        if os.getenv("UW_ENV") != "synthetic":
-            raise ValueError(
-                "this release requires UW_ENV=synthetic; real adapters are not approved"
-            )
+        environment = os.getenv("UW_ENV")
+        if environment not in {"synthetic", "public_research"}:
+            raise ValueError("UW_ENV must be synthetic or public_research")
         dsn = os.environ.get("UW_DATABASE_URL")
         root = os.environ.get("UW_STORAGE_ROOT")
         if not dsn or not root:
@@ -49,9 +51,14 @@ class Settings:
         return cls(
             database_url=dsn,
             storage_root=Path(root).resolve(),
+            environment=environment,
             timezone=os.getenv("UW_TIMEZONE", "Europe/Istanbul"),
-            study_code=os.getenv("UW_STUDY_CODE", "synthetic-pilot"),
-            cohort_code=os.getenv("UW_COHORT_CODE", "fixture"),
+            study_code=os.getenv(
+                "UW_STUDY_CODE", "synthetic-pilot" if environment == "synthetic" else "public-study"
+            ),
+            cohort_code=os.getenv(
+                "UW_COHORT_CODE", "fixture" if environment == "synthetic" else "public"
+            ),
             **{
                 name: int(os.getenv(f"UW_{name.upper()}", str(default)))
                 for name, default in (

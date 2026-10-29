@@ -14,7 +14,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[4]
 
 @contextmanager
 def connect(settings: Settings):
-    with psycopg.connect(settings.database_url, row_factory=dict_row) as conn:
+    with psycopg.connect(settings.database_url, row_factory=dict_row, connect_timeout=5) as conn:
         conn.execute("SET search_path TO uw, public")
         conn.execute("SET TIME ZONE 'UTC'")
         yield conn
@@ -37,6 +37,11 @@ def migrate(settings: Settings, directory: Path | None = None) -> list[str]:
             raise ValueError("no migration files found")
         if set(known) - {p.name for p in paths}:
             raise ValueError("database contains unknown migrations")
+        if set(known) != {p.name for p in paths[: len(known)]}:
+            raise ValueError(
+                "applied migrations must be a contiguous prefix; out-of-order migration"
+            )
+        prepared = []
         for path in paths:
             content = path.read_bytes()
             digest = hashlib.sha256(content).hexdigest()
@@ -44,6 +49,8 @@ def migrate(settings: Settings, directory: Path | None = None) -> list[str]:
                 if known[path.name] != digest:
                     raise ValueError(f"applied migration changed: {path.name}")
                 continue
+            prepared.append((path, content, digest))
+        for path, content, digest in prepared:
             conn.execute(content.decode("utf-8"), prepare=False)
             conn.execute(
                 "INSERT INTO uw.schema_migration(name,sha256) VALUES (%s,%s)", (path.name, digest)

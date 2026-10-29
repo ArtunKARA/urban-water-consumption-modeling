@@ -1,0 +1,6 @@
+# Stable migration checksums and research code hashes across Windows/Linux checkout.
+*.sql text eol=lf
+*.py text eol=lf
+*.toml text eol=lf
+*.ipynb text eol=lf
+uv.lock text eol=lf

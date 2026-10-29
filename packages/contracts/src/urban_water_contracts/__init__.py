@@ -59,3 +59,9 @@ def require_aware(value: datetime) -> datetime:
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError("an explicit timestamp offset is required")
     return value
+
+
+class ResearchMeasurement(Measurement):
+    """Source-neutral public research record; institutional processing remains gated."""
+
+    schema_version: Literal["urban-water.measurement.v1"] = "urban-water.measurement.v1"
