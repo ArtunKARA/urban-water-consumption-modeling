@@ -137,6 +137,13 @@ class MappedCsv:
 def get_normalizer(contract: str, parser: str, options: dict) -> SourceNormalizer:
     if contract not in {LEGACY_CONTRACT, RESEARCH_CONTRACT}:
         raise NormalizationError("unsupported measurement contract")
+    if parser == "aalborg-daily-csv/1":
+        from urban_water.sources.aalborg import AalborgDailyCsv
+
+        if contract != RESEARCH_CONTRACT:
+            raise NormalizationError("Aalborg cannot be relabelled as synthetic")
+        validate_options("aalborg_daily_v1", options)
+        return AalborgDailyCsv(options["archive_received_at"])
     expected = LEGACY_PARSER if contract == LEGACY_CONTRACT else "measurement-jsonl/1"
     if parser == expected:
         validate_options("measurement_jsonl_v1", options)

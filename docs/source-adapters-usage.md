@@ -39,13 +39,15 @@ tanımlanabilir. Şu an yalnız `family="meter_measurements"` desteklenir.
 |---|---|
 | `namespace` | Sağlayıcı/veri setinin kalıcı olay kimlik alanı. Dosya ve API aynı olayları taşıyorsa aynı kalır. |
 | `reader` | `local_file_v1` veya `http_file_v1` |
-| `normalizer` | `measurement_jsonl_v1` veya `mapped_csv_v1` |
+| `normalizer` | `measurement_jsonl_v1`, `mapped_csv_v1` veya sabit Aalborg eşlemesi `aalborg_daily_v1` |
 | `path` / `path_env` | Yerel dosya konumu; göreli yol TOML dosyasına göre çözülür. İkisinden yalnız biri kullanılır. |
 | `url_env` / `token_env` | HTTP URL'sini ve isteğe bağlı Bearer token'ını içeren ortam değişkenlerinin adları |
 | `fields` | Ortak alan → kaynak sütunu eşlemesi |
 | `constants` | Kaynak sözlüğüne dayanarak açıkça verilen sabitler; örneğin `unit="L"` |
 | `data_kind` | `synthetic` veya `public_research`; çalışma ortamıyla aynı olmalı |
 | `citation` / `license` | İsteğe bağlı veri künyesi/lisansı; kaynak ve dataset manifestine aktarılır |
+| `receipt_basis` / `value_semantics` | Teslimat saatinin ve hacmin yorumu; Aalborg'da research_archive_import ve upstream_processed_volume |
+| `expected_sha256` / `reference_sha256` | Kabul edilecek dosyanın sabit hash'i ve kaynak kataloğunun kimliği |
 
 Yapılandırmada keyfi Python import'u yoktur; kayıtlı sürümler seçilir.
 CSV'de eksik alanlar otomatik uydurulmaz. Geçerli `received_at` bilinmiyorsa
@@ -124,7 +126,8 @@ runtime ortamlarına `production` eklenmedi.
   hatası veya kaynak sınırı aşımı hiçbir staging'i yayımlamaz.
 
 Anket, meteoroloji, bölgesel tüketim ve diğer araştırma kayıtlarının yayın
-yolları henüz uygulanmadı. Veri seti seçimi ve sentetik üretici kalibrasyonu
+yolları henüz uygulanmadı. [Aalborg yıllık kohortu](aalborg-reference.md) 4 Kasım'da
+bağlandı; sentetik üretici kalibrasyonu ve eğitimler
 [araştırma başlangıç planındaki](research-data-bootstrap.md) sonraki iştir.
 
 ## Bu teslimatın doğrulaması
@@ -141,3 +144,8 @@ Bu koşumun kaydı Git dışındaki
 Kanıt DB'si script sonunda kaldırılmıştır; rapor ve dondurulmuş dosyalar kalır.
 Bu sonuç gerçek sağlayıcı bağlantısı, kamuya açık veri setinin semantik eşlemesi,
 model başarısı veya kapasite ölçümü değildir.
+
+4 Kasım 2026: Aalborg normalizer'ı ve açık ortamı seçen `--env-file` CLI/worker
+seçeneği eklendi. Test paketi **206 geçti, atlanan test yok**. Gerçek açık
+referansın içeri alınması, hacim/tekrar teslimat ve snapshot kontrolleri
+[Aalborg belgesinde](aalborg-reference.md) kayıtlıdır.

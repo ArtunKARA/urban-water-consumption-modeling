@@ -10,6 +10,8 @@ kodları ortak araştırma sözleşmesi üzerinden çalışmayı sürdürür.
 ortak ingestion ve worker yoluna bağlanır. Sentetik v1 geriye uyumludur;
 ayrı açık araştırma ortamı `urban-water.measurement.v1` kullanır.
 [Çalıştırma ve kapsam](source-adapters-usage.md) uygulanan kısmı gösterir.
+4 Kasım'da [Aalborg yıllık referansı](aalborg-reference.md) sabit bir normalizer
+ile aynı katmana bağlandı; arşiv alımı ve işlenmiş hacim anlamı ayrıca işaretlenir.
 [Araştırma girdi/çıktı şeması](contracts/research-data-contract.v0.1.schema.json)
 henüz bütün kayıt aileleri için çalışan genel ingestion biçimi değildir.
 

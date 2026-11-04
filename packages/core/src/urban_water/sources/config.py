@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import tomllib
+from datetime import datetime
 from pathlib import Path
 from typing import Literal
 
@@ -21,13 +22,20 @@ class SourceSpec(BaseModel):
     family: Literal["meter_measurements"] = "meter_measurements"
     data_kind: Literal["synthetic", "public_research"] = "synthetic"
     reader: Literal["local_file_v1", "http_file_v1"] = "local_file_v1"
-    normalizer: Literal["measurement_jsonl_v1", "mapped_csv_v1"] = "measurement_jsonl_v1"
+    normalizer: Literal["measurement_jsonl_v1", "mapped_csv_v1", "aalborg_daily_v1"] = (
+        "measurement_jsonl_v1"
+    )
     path: str | None = None
     path_env: str | None = None
     url_env: str | None = None
     token_env: str | None = None
     citation: str | None = Field(default=None, max_length=2048)
     license: str | None = Field(default=None, max_length=128)
+    receipt_basis: Literal["source_receipt", "research_archive_import"] = "source_receipt"
+    value_semantics: Literal["as_delivered", "upstream_processed_volume"] = "as_delivered"
+    archive_received_at: str | None = None
+    expected_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    reference_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     timeout_seconds: float = Field(default=15, ge=0.1, le=60, allow_inf_nan=False)
     fields: dict[str, str] = Field(default_factory=dict)
     constants: dict[str, str | int] = Field(default_factory=dict)
@@ -42,6 +50,17 @@ class SourceSpec(BaseModel):
             raise ValueError("HTTP reader requires url_env and no local path")
         if self.namespace == "legacy" and self.data_kind != "synthetic":
             raise ValueError("legacy namespace is reserved for synthetic compatibility")
+        if self.normalizer == "aalborg_daily_v1":
+            if (
+                self.data_kind != "public_research"
+                or self.receipt_basis != "research_archive_import"
+                or self.value_semantics != "upstream_processed_volume"
+            ):
+                raise ValueError("Aalborg requires explicit public/archive/preprocessed semantics")
+            if self.fields or self.constants or self.delimiter != ",":
+                raise ValueError("Aalborg v1 has a fixed mapping")
+        elif self.archive_received_at is not None:
+            raise ValueError("archive_received_at is only used by the Aalborg normalizer")
         validate_options(self.normalizer, self.options)
         return self
 
@@ -51,12 +70,16 @@ class SourceSpec(BaseModel):
 
     @property
     def parser(self) -> str:
+        if self.normalizer == "aalborg_daily_v1":
+            return "aalborg-daily-csv/1"
         if self.normalizer == "mapped_csv_v1":
             return "mapped-csv/1"
         return LEGACY_PARSER if self.data_kind == "synthetic" else "measurement-jsonl/1"
 
     @property
     def options(self) -> dict:
+        if self.normalizer == "aalborg_daily_v1":
+            return {"archive_received_at": self.archive_received_at}
         if self.normalizer == "measurement_jsonl_v1":
             return (
                 {}
@@ -71,6 +94,15 @@ class SourceSpec(BaseModel):
 
 
 def validate_options(normalizer: str, options: dict) -> None:
+    if normalizer == "aalborg_daily_v1":
+        if set(options) != {"archive_received_at"} or not isinstance(
+            options["archive_received_at"], str
+        ):
+            raise ValueError("Aalborg requires a pinned archive receipt time")
+        instant = datetime.fromisoformat(options["archive_received_at"])
+        if instant.tzinfo is None or instant.utcoffset() is None:
+            raise ValueError("archive receipt time requires an explicit offset")
+        return
     if normalizer == "measurement_jsonl_v1":
         if options:
             raise ValueError("JSONL uses the measurement contract without field mappings")

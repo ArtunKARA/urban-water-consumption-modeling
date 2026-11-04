@@ -1,7 +1,8 @@
 # Sentetik veri, açık araştırma verisi ve sağlayıcı API'si
 
-Tarih: 29 Ekim 2026. Durum: **ilk sayaç adaptörleri uygulandı; veri setine özel
-eşleme ve eğitimler sonraki iş**. [Çalışan kaynak yolu](source-adapters-usage.md).
+Tarih: 4 Kasım 2026. Durum: **Aalborg yıllık kohortu ortak katmana bağlandı;
+eğitimler sonraki iş**. [Çalışan kaynak yolu](source-adapters-usage.md),
+[Aalborg aktarım sonucu ve sınırları](aalborg-reference.md).
 
 Amaç: Önce sentetik veriyle, sonra erişilebilir bir araştırma veri setiyle,
 sonunda kurum API'siyle aynı araştırma kodunu çalıştırmak. Kaynak değişimini
@@ -89,10 +90,12 @@ kontrol edildi:
   dönem başını mı sonunu mu gösterdiği, yerel gün tanımı, doldurma işlemleri,
   kod kitabı ve sıfırların anlamı adaptör kabulünden önce çözülecek.
 
-Teknik raporun üniversite sayfası incelendi; PDF bağlantısı bu oturumda 403
-döndürdü. Tam yöntem doğrulaması bitmedi. Özellikle tüketimden türetilmiş
-doluluk etiketlerini gelecekteki tüketimin tahmininde kullanmak veri sızıntısı
-oluşturabilir; ilk tüketim-geçmişi deneyi bu alanları özellik olarak almayacak.
+Teknik raporun PDF bağlantısı 403 döndürdü. 4 Kasım'da aynı veri paketindeki
+üç işleme script'i seçilerek indirildi ve çalıştırılmadan incelendi. Önceki saati
+temsil eden dönem bitişi, öğleden öğlene doluluk günü, interpolasyon ve günlük
+minimumun çıkarılması doğrulandı. Tüketimden türetilen doluluk alanları ilk
+ölçüm/özellik çıktısına alınmadı. Günlük minimumun gelecekteki saatlerden
+etkilenmesi nedeniyle canlı tahmin başarısı ayrıca doğrulanmalıdır.
 
 ## Bir sonraki somut teslimat
 
@@ -105,6 +108,11 @@ oluşturabilir; ilk tüketim-geçmişi deneyi bu alanları özellik olarak almay
 | 5 | Senaryoları eklemek ve aynı akışa vermek | Kaçak, normal davranış değişimi ve cihaz/aktarım sorunu ayrı truth/rapor; truth özelliklere girmemeli |
 | 6 | Kontrollü yerel HTTP kaynağıyla kaynak değişimini sınamak | Dosya ve HTTP aynı ortak olayları/dataset sonucunu üretmeli; sayfalama, timeout, duplicate, revision ve cursor sonrası kapanış sınanmalı |
 | 7 | Gerçek sağlayıcı örneğiyle API adaptörünü doğrulamak | Kimlik, saat, birim, yeniden gönderim ve düzeltme semantiği gerçek anonim örnekle kanıtlanmalı; kurum geçiş koşulları tamamlanmalı |
+
+4 Kasım durumu: 1 ve 2 tamamlandı. 6'nın dosya/tek HTTP nesnesi karşılaştırması
+önceki teslimatta geçti; sayfalama/cursor desteklenmiş sayılmaz. 3 için saatlik
+ve günlük snapshot'lar hazır; veri bölmeleri ve model karşılaştırması henüz
+çalıştırılmadı. Kaynak toplamı 915.140 litre, 87.360 kayıt ve 10 hane ile korundu.
 
 İlk küçük karşılaştırma, ilk **kapsamlı** sentetik teslimatın kabul edilen üç
 araştırma hattını daraltmaz. P01'in iki yaklaşımı, F01'in 18:00/23:00 ayrı
@@ -148,6 +156,8 @@ tahmin anında bilinen hava tahmini yerine kullanılamaz.
 29 Ekim uygulaması yerel/HTTP, JSONL/CSV sayaç yolunu ekledi. Kaynak eşlemesi ve
 sürümü kabulde sabitlenir. Ayrı `UW_ENV=public_research` ortamı kaynak tarafsız
 `urban-water.measurement.v1` kullanır. Genel araştırma paket şeması bütün kayıt
-aileleriyle henüz CLI girdisi değildir. Aalborg'a özel dönem/zaman eşlemesi,
-gerçek açık verinin içeri alınması, sentetik kalibrasyon ve model eğitimleri
-henüz yapılmadı. Kontrollü HTTP kanıtı kurum API'si doğrulaması değildir.
+aileleriyle henüz CLI girdisi değildir. Aalborg'a özel dönem/zaman eşlemesi ve
+açık yıllık kohortun içeri alınması 4 Kasım'da tamamlandı. Kaynak alımı
+`research_archive_import`, hacim anlamı `upstream_processed_volume` olarak
+manifestlere işlendi. Sentetik kalibrasyon ve model eğitimleri henüz yapılmadı.
+Kontrollü HTTP kanıtı kurum API'si doğrulaması değildir.

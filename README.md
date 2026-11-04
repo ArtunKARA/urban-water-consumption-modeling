@@ -94,6 +94,16 @@ DB oluşturup kendi oluşturdukları DB'yi kaldırır; test hesabında CREATEDB 
 `notebooks/01_observed_volume.ipynb` dosyasını bu `.venv` Python kernel'iyle açın.
 Notebook yalnızca core'u çağırır; veri hazırlama mantığı kopyalamaz.
 
+İlk açık araştırma verisini ayrı DB'de hazırlamak ve içeri almak için:
+
+```powershell
+& $uv run python scripts/run_aalborg.py
+```
+
+[Aalborg veri kaynağı ve sonuçları](docs/aalborg-reference.md), kullanılan dosya
+konumlarını ve sınırları açıklar. `notebooks/02_aalborg_reference.ipynb` hazır
+saatlik/günlük snapshot'ları inceler. Bu adım model eğitimi içermez.
+
 ## Belgeler ve kapsam
 
 - [Kaynak → veri → ilişki → model → çıktı diyagramları — v0.1 taslak](docs/contracts/research-data-model.md)
@@ -107,6 +117,7 @@ Notebook yalnızca core'u çağırır; veri hazırlama mantığı kopyalamaz.
 - [Değiştirilebilir kaynaklar ve adaptör arabirimleri — tasarım](docs/source-adapters.md)
 - [Dosya/HTTP kaynak noktaları — çalışan kod ve kullanım](docs/source-adapters-usage.md)
 - [Sentetik veri → açık araştırma verisi → API geçiş planı](docs/research-data-bootstrap.md)
+- [İlk açık araştırma verisi: Aalborg — aktarım, sonuçlar ve sınırlar](docs/aalborg-reference.md)
 - [Veri sözlüğü](docs/data-dictionary.md)
 - [Yedekleme, kurtarma ve işletim](docs/operations.md)
 - [Araştırma protokolleri](research/experiments/protocols.toml)

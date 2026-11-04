@@ -39,8 +39,8 @@ class Settings:
                 raise ValueError(f"{name} must be positive")
 
     @classmethod
-    def from_env(cls) -> "Settings":
-        load_dotenv(override=False)
+    def from_env(cls, env_file: Path | None = None) -> "Settings":
+        load_dotenv(dotenv_path=env_file, override=False)
         environment = os.getenv("UW_ENV")
         if environment not in {"synthetic", "public_research"}:
             raise ValueError("UW_ENV must be synthetic or public_research")

@@ -18,7 +18,10 @@ from urban_water_simulator import generate
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Urban water synthetic research infrastructure")
+    parser = argparse.ArgumentParser(description="Urban water research infrastructure")
+    parser.add_argument(
+        "--env-file", type=Path, help="Explicit environment file; shell variables win"
+    )
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("migrate")
     sub.add_parser("status")
@@ -58,7 +61,7 @@ def main() -> None:
         elif args.command == "simulate":
             result = generate(args.directory, args.households, args.days, args.seed)
         else:
-            settings = Settings.from_env()
+            settings = Settings.from_env(args.env_file)
             if args.command == "migrate":
                 result = {"applied": migrate(settings)}
             elif args.command == "seed":

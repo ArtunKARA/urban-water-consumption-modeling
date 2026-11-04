@@ -15,7 +15,7 @@ alanlar kabul edilmez. `uw contract` tek otorite Pydantic modelinden JSON Schema
 | revision | Pozitif tam sayı; 1'den başlayan açık düzeltme sürümü |
 | kind | `pulse`, `interval` veya `index`; stream türüyle aynı |
 | occurred_at | Offset içeren pulse anı veya dönem/endeks bitiş anı |
-| received_at | Kaynağın teslim aldığı an; analiz anıyla karıştırılmaz |
+| received_at | Kaynağın teslim aldığı an; source.acquisition.receipt_basis ile yorumlanır. Varsayılan source_receipt; açık veri adaptöründe research_archive_import gerçek araştırma alımını gösterir, geçmiş sağlayıcı saati değildir. |
 | interval_start | Yalnızca interval için dahil başlangıç; occurred_at hariç bitiş |
 | value | Pozitif/sıfır kesin ondalık; en çok 24 basamak, 9 ondalık |
 | unit | `pulse`, `L`, `m3`; pulse sayısı tam sayı olmak zorunda |
@@ -30,7 +30,8 @@ meter -> stream ve meter -> installation -> household. Sayılar (50/100/150 vb.)
 şemaya sabitlenmez. Hane isim/telefon/adres bilgisi için alan bulunmaz.
 
 Kanonik ölçüm tekilliği `(stream_id,event_id,revision)`; provenance tekilliği
-`(source_id,row_no)`; kaynak tekilliği `(sha256,contract_version,parser_version)`.
+`(source_id,row_no)`; kaynak tekilliği
+`(sha256,contract_version,parser_version,namespace,options_sha256)`.
 `received_at` tekrar teslimatta değişebilir; olay içeriği hash'ine dahil değildir.
 
 Kalite kodları: `invalid_contract`, `unknown_stream`, `stream_kind_mismatch`,

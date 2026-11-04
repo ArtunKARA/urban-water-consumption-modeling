@@ -54,8 +54,13 @@ def accept(settings: Settings, path: Path, *, source: SourceSpec | None = None) 
         "data_kind": source.data_kind if source else "synthetic",
         "citation": source.citation if source else None,
         "license": source.license if source else None,
+        "receipt_basis": source.receipt_basis if source else "source_receipt",
+        "value_semantics": source.value_semantics if source else "as_delivered",
+        "reference_sha256": source.reference_sha256 if source else None,
     }
     digest, size, key = FileStore(settings).put(path)
+    if source and source.expected_sha256 is not None and digest != source.expected_sha256:
+        raise SourceConflict("source does not match its pinned reference checksum")
     with connect(settings) as conn:
         conn.execute("SELECT pg_advisory_xact_lock(83621002)")
         ensure_environment(conn, settings)

@@ -193,7 +193,9 @@ def freeze(settings: Settings, grain: str = "day") -> dict:
         manifest = {
             "format": "urban-water.dataset.v2",
             "dataset_id": str(dataset_id),
-            "purpose": "observed-volume-correctness",
+            "purpose": "public-reference-normalization"
+            if settings.environment == "public_research"
+            else "observed-volume-correctness",
             "environment": settings.environment,
             "grain": grain,
             "timezone": settings.timezone,
@@ -216,6 +218,12 @@ def freeze(settings: Settings, grain: str = "day") -> dict:
                 "row_count": normalization_count,
             },
             "sources": [{**s, "id": str(s["id"])} for s in sources],
+            "value_semantics": sorted(
+                {s["acquisition"].get("value_semantics", "as_delivered") for s in sources}
+            ),
+            "receipt_basis": sorted(
+                {s["acquisition"].get("receipt_basis", "source_receipt") for s in sources}
+            ),
             "registry": registry,
             "streams": streams,
             "configurations": configurations,

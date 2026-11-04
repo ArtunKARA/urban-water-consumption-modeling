@@ -1,0 +1,55 @@
+{
+  "format": "urban-water.reference.v1",
+  "record_id": "15180141",
+  "version": "v1",
+  "doi": "10.5281/zenodo.15180141",
+  "title": "Residential Household Dataset: Occupancy, Water, and Electricity Data",
+  "authors": "Schaffer, Jensen, Larsen, Marszal-Pomianowska, Rohde, Rubak, Vera-Valdes (2025)",
+  "report_doi": "10.54337/aau780546283",
+  "license": "CC-BY-4.0",
+  "metadata_url": "https://zenodo.org/api/records/15180141",
+  "zip_url": "https://zenodo.org/api/records/15180141/files/final_data.zip/content",
+  "zip_bytes": 426228,
+  "zip_md5": "ef68f7e8ffceb2de7cb02764b057aaf4",
+  "zip_sha256": "af2823cea25c40694c68da3057b4eb6928cfcdbdd9f6603529f8eef05d1edc50",
+  "selected_member": "final_data/daily_data.csv",
+  "csv_bytes": 8127282,
+  "csv_sha256": "bec258c6f61d417dbff3f1b642f4414574173c60aba886efaa77250201d5a497",
+  "expected_rows": 87360,
+  "expected_buildings": 10,
+  "expected_total_liters": "915140",
+  "timezone": "Europe/Copenhagen",
+  "source_timestamp": "exclusive end of preceding one-hour interval",
+  "occupancy_date": "noon-to-noon label based on source timestamp; excluded from measurements",
+  "preprocessing": [
+    "Cumulative index interpolated onto rounded timestamps upstream",
+    "Rounded litre indexes differenced to form hourly volumes upstream",
+    "Per-building daily minimum hourly volume subtracted upstream"
+  ],
+  "receipt_policy": "received_at is actual research archive receipt; historical provider receipt is not published",
+  "identity_policy": "export building plus UTC interval end; no value or CSV row number in event identity",
+  "registry_policy": "export building aliases attached to logical series identifiers; physical meter serials are not published",
+  "reference_archive_url": "https://zenodo.org/api/records/15180141/files/Schaffer_et_al_occupancy_water_electricity.zip/content",
+  "reference_archive_bytes": 745277947,
+  "upstream_scripts": [
+    {
+      "member": "data_collection/daily/00_save_swm_for_app.R",
+      "sha256": "9522f4f0700b39a214e91742059d34f59bcf6e93d148f576b5ea8ad6c2c63500"
+    },
+    {
+      "member": "data_collection/daily/04_write_final_data.R",
+      "sha256": "61d367e4a55c676bd5053485189adc34c8fd6542f974cd2d19634af79194a3b7"
+    },
+    {
+      "member": "data_collection/hourly/02_write_final_data.R",
+      "sha256": "694ee40082a4937525a2133d699d01bc40c56acb7bdb510ee2d39f001c4a3cd1"
+    }
+  ],
+  "remaining_limits": [
+    "Published processed volume is not raw water consumption or validated leakage truth",
+    "Published preprocessing is retrospective; historical online availability is unknown",
+    "No imported questionnaire, income, weather or independent leak labels",
+    "Full technical-report PDF was blocked with HTTP 403 during verification; primary processing scripts were inspected instead",
+    "Separate diary cohort hourly_data.csv is preserved in the ZIP but not combined with the annual cohort"
+  ]
+}

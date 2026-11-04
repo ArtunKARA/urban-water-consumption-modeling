@@ -1,6 +1,7 @@
 import argparse
 import json
 import threading
+from pathlib import Path
 
 from urban_water.ingestion import work_once
 from urban_water.settings import Settings
@@ -10,10 +11,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Process durable ingestion jobs")
     parser.add_argument("--once", action="store_true")
     parser.add_argument("--poll-seconds", type=float, default=1)
+    parser.add_argument(
+        "--env-file", type=Path, help="Explicit environment file; shell variables win"
+    )
     args = parser.parse_args()
     if not 0.1 <= args.poll_seconds <= 60:
         parser.error("poll interval must be between 0.1 and 60 seconds")
-    settings = Settings.from_env()
+    settings = Settings.from_env(args.env_file)
     run_worker(settings, args.once, args.poll_seconds)
 
 
