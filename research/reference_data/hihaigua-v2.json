@@ -1,0 +1,47 @@
+{
+  "schema": "urban-water.hihaigua-reference.v1",
+  "source_id": "hihaigua-v2",
+  "record_id": "21704780",
+  "doi": "10.5281/zenodo.21704780",
+  "license": "CC-BY-4.0",
+  "archive": "hihAigua_dataset.zip",
+  "archive_sha256": "5d80ae27cedec13d24689b043cfc414826f27aaeb06feb42979d4788a39135ad",
+  "archive_bytes": 150742573,
+  "zip_prefix": "hihAigua_dataset",
+  "household_ids": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+  "timestamp_basis": "unix_epoch_milliseconds_utc",
+  "timestamp_evidence": {
+    "url": "https://zenodo.org/records/21704780",
+    "artifact": "processing_script.py",
+    "artifact_sha256": "f1b3cdfcf7a307c54c317dbc5ea066accf74a80365b6177958b0e61135c96d87",
+    "basis": "Publisher code parses ts_epoch as milliseconds. Native ts_dt values are separately checked against that UTC interpretation."
+  },
+  "expected_cadence_ms": 420000,
+  "gap_threshold_ms": 630000,
+  "components": {
+    "water": {
+      "label": "Publisher water device family; cold-water stream",
+      "unit_review": {
+        "status": "pending",
+        "unit": null,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "note": "Public release names the hardware but does not explicitly identify the numeric volume unit. No litre conversion is inferred."
+      }
+    },
+    "hotWater": {
+      "label": "Publisher hotWater device family; separate hot-water stream",
+      "unit_review": {
+        "status": "pending",
+        "unit": null,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "note": "Hydraulic relationship to water is unresolved. Never sum the two into a household total automatically."
+      }
+    }
+  },
+  "scope_policy": "One component per canonical import environment. Field installations only; lab, ambient, electricity and heatCoolingLoadMeter are excluded.",
+  "forecast_timezone": null,
+  "aggregation_review": "Hour/day boundaries generally fall between counter samples. The core does not invent within-interval allocation; cross-bucket volume remains unallocated and coverage unknown. A daily forecast target needs a separate reviewed policy.",
+  "model_ready": false
+}

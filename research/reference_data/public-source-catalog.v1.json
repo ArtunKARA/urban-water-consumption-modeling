@@ -1,0 +1,698 @@
+{
+  "schema": "urban-water.public-source-catalog.v1",
+  "review_date": "2026-11-04",
+  "collection_boundary": "Reference research files only; no institutional identity join, no automatic publication or ingestion. Missing values are not zeros. Household, fixture, event, controlled laboratory and synthetic data remain separate.",
+  "sources": [
+    {
+      "id": "hsb-living-lab-v1.1",
+      "title": "HSB Living Lab Fixture-Level Household Water Consumption Dataset (2019–2023)",
+      "landing_page": "https://zenodo.org/records/22076411",
+      "doi": "10.5281/zenodo.22076411",
+      "license": "CC-BY-4.0",
+      "reuse_gate": "attribution_required",
+      "role": "fixture_streams",
+      "files": [
+        {
+          "path": "HSB_Living_Lab_Data_Package.zip",
+          "url": "https://zenodo.org/api/records/22076411/files/HSB_Living_Lab_Data_Package.zip/content",
+          "bytes": 6244502,
+          "md5": "1db6a143f39da53710e63c6bb353d5b1",
+          "sha256": "ff766b30d05e65c2477fc929d56a112d5b0775619075daa2bd6dd687c57c7c89"
+        },
+        {
+          "path": "verify_R5.py",
+          "url": "https://zenodo.org/api/records/22076411/files/verify_R5.py/content",
+          "bytes": 14292,
+          "md5": "2218061bf175a90fcb202407153c2973",
+          "sha256": "af1f32f9cc51535604a8e40cd3668194c84fa4034f655dfb5ee6c332476134a5"
+        },
+        {
+          "path": "verified_numbers_R5.json",
+          "url": "https://zenodo.org/api/records/22076411/files/verified_numbers_R5.json/content",
+          "bytes": 4883,
+          "md5": "e3ce05c69054224c2835d627198d71d1",
+          "sha256": "852b590441e6fda92ab32280586f2c91382654124f3b979719fa9dae25f9c306"
+        },
+        {
+          "path": "record.json",
+          "url": "https://zenodo.org/api/records/22076411",
+          "max_bytes": 1000000,
+          "sha256": "4b959b1aea5ecc63d36819865bbffb6bee0a5d0d9097bf0674d422592502a0d6",
+          "bytes": 5219
+        }
+      ],
+      "best_for": [
+        "fixture-pattern analysis",
+        "method development after unit resolution"
+      ],
+      "limitations": [
+        "value unit conflict: dictionary litres versus verification code and reported totals in m3; no canonical volume conversion until resolved",
+        "zeros and values >0.3 removed upstream; not a dense complete series or leak ground truth",
+        "214 installed sensors include 6 nonresidential; residential includes shared facilities; not 214 homes",
+        "timestamp rounded to 10min; UTC per dictionary; no historic arrival timestamps"
+      ],
+      "models": [
+        "P01_conditional",
+        "F01_conditional",
+        "A01_development_only"
+      ]
+    },
+    {
+      "id": "hihaigua-v2",
+      "title": "hihAigua dataset",
+      "landing_page": "https://zenodo.org/records/21704780",
+      "doi": "10.5281/zenodo.21704780",
+      "license": "CC-BY-4.0",
+      "reuse_gate": "attribution_required",
+      "role": "household_multi_utility_and_lab_events",
+      "files": [
+        {
+          "path": "hihAigua_dataset.zip",
+          "url": "https://zenodo.org/api/records/21704780/files/hihAigua_dataset.zip/content",
+          "bytes": 150742573,
+          "md5": "22ccb08edd1dd93bfc4749452cb37151",
+          "sha256": "5d80ae27cedec13d24689b043cfc414826f27aaeb06feb42979d4788a39135ad"
+        },
+        {
+          "path": "processing_script.py",
+          "url": "https://zenodo.org/api/records/21704780/files/processing_script.py/content",
+          "bytes": 10842,
+          "md5": "11b59e70f34fc0cbe27b3caf061b315b",
+          "sha256": "f1b3cdfcf7a307c54c317dbc5ea066accf74a80365b6177958b0e61135c96d87"
+        },
+        {
+          "path": "record.json",
+          "url": "https://zenodo.org/api/records/21704780",
+          "max_bytes": 1000000,
+          "sha256": "f33ac2cf1050f8267104f8395601194164521815adceb47aa0bc7b52f354af1a",
+          "bytes": 5692
+        }
+      ],
+      "best_for": [
+        "independent daily forecasting cohort after semantic adapter",
+        "water-energy patterns",
+        "controlled end-use classification"
+      ],
+      "limitations": [
+        "10 field homes and lab are separate cohorts; lab labels do not label household telemetry",
+        "volume is cumulative; heatCoolingLoadMeter volume is not household water demand",
+        "water/hotWater hydraulic relationship and units require verification before summing",
+        "epoch ms is preserved; timezone-naive ts_dt and labels require reconciliation",
+        "publisher script fills gaps with zero; not adopted; no historic arrival timestamps"
+      ],
+      "models": [
+        "F01_priority",
+        "F02_priority",
+        "P01_consumption_only",
+        "A01_development_only"
+      ],
+      "publication": "https://doi.org/10.1038/s41597-026-08485-5",
+      "release_label": "v2"
+    },
+    {
+      "id": "ciws-utah-v2026-11-04",
+      "title": "CIWS semi-supervised end-use disaggregation supporting data",
+      "landing_page": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/",
+      "doi": "10.4211/hs.3143b3b1bdff48e0aaebcb4aedf02feb",
+      "license": "CC-BY-4.0",
+      "reuse_gate": "attribution_required",
+      "role": "five_households_seasonal_high_resolution_and_manual_training_events",
+      "version_note": "Mutable resource; pinned publisher file hashes, metadata snapshot and download receipts identify this selection. Plot duplicate and unlabeled duplicate results omitted.",
+      "files": [
+        {
+          "path": "CIWS_Disaggregator/CIWS_Disaggregator_SS_FV.ipynb",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/CIWS_Disaggregator_SS_FV.ipynb",
+          "bytes": 9443,
+          "md5": "b8053fe0ac80b51fdc9fafb708f97464",
+          "sha256": "84d035fb73406456c5f98b28a931f055d55a1eb9cebb31781dd0e3a408877155"
+        },
+        {
+          "path": "CIWS_Disaggregator/CIWS_Disaggregator_SS.py",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/CIWS_Disaggregator_SS.py",
+          "bytes": 27202,
+          "md5": "6c94368067275e07e657ae5f3c2eefeb",
+          "sha256": "b28f70cf120500592bd097abb2527d39f8ce2c8466aa21971d2eda25b1c64604"
+        },
+        {
+          "path": "CIWS_Disaggregator/Events/Readme.rtf",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/Events/Readme.rtf",
+          "bytes": 409,
+          "md5": "2be4e5ccee73daa157a2eab18aa64748",
+          "sha256": "070673498aacc9c0a13f3fe3f592e42b9a0d48961ee3ff366cde078089896f01"
+        },
+        {
+          "path": "CIWS_Disaggregator/RawData/summer_HH_1.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/RawData/summer_HH_1.csv",
+          "bytes": 9701427,
+          "md5": "1d3b970b1f834fd1132f88b5b4aaceca",
+          "sha256": "c6919d9a062088eb52f0d38da850f4078af58250e937416e960973fb4178ea39"
+        },
+        {
+          "path": "CIWS_Disaggregator/RawData/summer_HH_2.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/RawData/summer_HH_2.csv",
+          "bytes": 10311447,
+          "md5": "1ebf5fae175a278aa33de0f32f2b0ddd",
+          "sha256": "100ca4e18c562732dcd0b917d585096957e52188fd91c4032d771cf6b184dded"
+        },
+        {
+          "path": "CIWS_Disaggregator/RawData/summer_HH_3.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/RawData/summer_HH_3.csv",
+          "bytes": 8140302,
+          "md5": "ee0a0ae44461edfe6c0140ad0081ef1e",
+          "sha256": "40b346cb58fe9b4ae67341f76ae7b0ef62ba31037b24a38bfa1e576d394e8b1b"
+        },
+        {
+          "path": "CIWS_Disaggregator/RawData/summer_HH_4.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/RawData/summer_HH_4.csv",
+          "bytes": 7990664,
+          "md5": "8e59dcdd42e5333aa775b71383279944",
+          "sha256": "991c793814b6abaf21a0649a3910a4d7d937e29284ef2552fae4cf00db1a3504"
+        },
+        {
+          "path": "CIWS_Disaggregator/RawData/summer_HH_5.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/RawData/summer_HH_5.csv",
+          "bytes": 8761807,
+          "md5": "ff717141663748c347008753f6b4f618",
+          "sha256": "d6816273343afa2a970f6822472318d9b8376b15b905d3050ad25026f08dc542"
+        },
+        {
+          "path": "CIWS_Disaggregator/RawData/winter_HH_1.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/RawData/winter_HH_1.csv",
+          "bytes": 12116679,
+          "md5": "ec6f15bf37d9431647db746bb84d739c",
+          "sha256": "0dc26b3427b83a20c2ca2a59a20ca7e41ba60b44b1d2c0793603b4a7b9aae579"
+        },
+        {
+          "path": "CIWS_Disaggregator/RawData/winter_HH_2.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/RawData/winter_HH_2.csv",
+          "bytes": 7862453,
+          "md5": "3315249b06b1535e0197a76c94163d9d",
+          "sha256": "0aa60a93d6c2c40f56d7a7215b87407c70467921e18098988072831d44d90eec"
+        },
+        {
+          "path": "CIWS_Disaggregator/RawData/winter_HH_3.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/RawData/winter_HH_3.csv",
+          "bytes": 8467144,
+          "md5": "701876181c52180219d85a16acf5afe7",
+          "sha256": "0a4035ef224c3ec6d9c3288113e5546cc6f15bc4adcbfb2aee7a04afcea4258e"
+        },
+        {
+          "path": "CIWS_Disaggregator/RawData/winter_HH_4.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/RawData/winter_HH_4.csv",
+          "bytes": 8467217,
+          "md5": "26b46cba4ea2b13362ff4f9e56c0f48b",
+          "sha256": "dc7c851ce8559e55c8f25fb2da6d4afd6421596e039d4b944ff717aaf779685c"
+        },
+        {
+          "path": "CIWS_Disaggregator/RawData/winter_HH_5.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/RawData/winter_HH_5.csv",
+          "bytes": 13910131,
+          "md5": "8427f2f7d8a62bdca350f50e24fd8d52",
+          "sha256": "96ff32576cec113846161c324b6a0aca9e90e964cf07aa57daa26a4c661022d8"
+        },
+        {
+          "path": "CIWS_Disaggregator/Results/All_Events_L.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/Results/All_Events_L.csv",
+          "bytes": 13089142,
+          "md5": "992de8cb056abc07abef508f0e4d85aa",
+          "sha256": "b05e2cf1797e9b33f12b77c82b60d4f2978bd0699e33755f908be9648794f58c"
+        },
+        {
+          "path": "CIWS_Disaggregator/Results/LabelledEvents_summer_HH_1.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/Results/LabelledEvents_summer_HH_1.csv",
+          "bytes": 5726899,
+          "md5": "5ec475ba1d72284c5194b2edb56f0c83",
+          "sha256": "015ac2de7c867aef868e12f1cbe6dd792abac848b8fc1cd533c3cea132c493d3"
+        },
+        {
+          "path": "CIWS_Disaggregator/Results/LabelledEvents_summer_HH_2.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/Results/LabelledEvents_summer_HH_2.csv",
+          "bytes": 375359,
+          "md5": "9d9aa354150e88f61aaf488c1a56c252",
+          "sha256": "9af04f6a85d7535eec4c86156d492cc0f109523cf1aa5648f16c768ec51c1ac1"
+        },
+        {
+          "path": "CIWS_Disaggregator/Results/LabelledEvents_summer_HH_3.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/Results/LabelledEvents_summer_HH_3.csv",
+          "bytes": 371695,
+          "md5": "8778a06a85b0793811c2696a725505e6",
+          "sha256": "d1a28b2fb5a3397e695d766833e638e69218c26f44d56f5a512538779e77a003"
+        },
+        {
+          "path": "CIWS_Disaggregator/Results/LabelledEvents_summer_HH_4.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/Results/LabelledEvents_summer_HH_4.csv",
+          "bytes": 329890,
+          "md5": "65a8e20af63b86bd8ac0d879c2a608e6",
+          "sha256": "46515492d00a83a6342aaea718493b2fc1052ee60c32f25b0061b48ae5e52787"
+        },
+        {
+          "path": "CIWS_Disaggregator/Results/LabelledEvents_summer_HH_5.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/Results/LabelledEvents_summer_HH_5.csv",
+          "bytes": 255279,
+          "md5": "1c55472747d6b55df213f59cfab5377a",
+          "sha256": "cd6da440dcd9d773ce66ef50893aaa64bec8cded64f3d595c6177423da787cd9"
+        },
+        {
+          "path": "CIWS_Disaggregator/Results/LabelledEvents_winter_HH_1.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/Results/LabelledEvents_winter_HH_1.csv",
+          "bytes": 4901600,
+          "md5": "3068d058c44b926da2183bf2ee415f6a",
+          "sha256": "365408f288379bbb97e4ef8d37c46fc69f420432fb8c3e966f88b14622172baa"
+        },
+        {
+          "path": "CIWS_Disaggregator/Results/LabelledEvents_winter_HH_2.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/Results/LabelledEvents_winter_HH_2.csv",
+          "bytes": 250453,
+          "md5": "02bce79be4122cfe9a48bc8e6dae917f",
+          "sha256": "c12f3aaf34802709a9fa873b4ad38e447d70e93a289667595b228f1ec444d246"
+        },
+        {
+          "path": "CIWS_Disaggregator/Results/LabelledEvents_winter_HH_3.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/Results/LabelledEvents_winter_HH_3.csv",
+          "bytes": 420560,
+          "md5": "f139b6cf4fb34c94a0cd1ec0381f5beb",
+          "sha256": "8f88994fe1c1df135ae339fcb9d5ff9002eac3a37360c5c92dc7e81042ec0570"
+        },
+        {
+          "path": "CIWS_Disaggregator/Results/LabelledEvents_winter_HH_4.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/Results/LabelledEvents_winter_HH_4.csv",
+          "bytes": 183779,
+          "md5": "3e03e84dca9c807f7a611397382ce65a",
+          "sha256": "bf94aa23fa8137691547265e5f59e34feb34501f244fde0dead0a7ca9d1151df"
+        },
+        {
+          "path": "CIWS_Disaggregator/Results/LabelledEvents_winter_HH_5.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/Results/LabelledEvents_winter_HH_5.csv",
+          "bytes": 293766,
+          "md5": "90ce6413e7c7bf2ddd5cf8bf2b6af6d0",
+          "sha256": "846511bc8746f58f7ed011ea60e2da301cf5fec2c35615db7bdb809db3797efd"
+        },
+        {
+          "path": "CIWS_Disaggregator/Sites_ResidentialStudy_Info.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/Sites_ResidentialStudy_Info.csv",
+          "bytes": 464,
+          "md5": "40c6a73bfeb5aac17d9e57819c854f66",
+          "sha256": "b0702d29c4d98c677078140d482917f4f388e882794bae49c84514072a003968"
+        },
+        {
+          "path": "CIWS_Disaggregator/TrainingDataset_SS.csv",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/CIWS_Disaggregator/TrainingDataset_SS.csv",
+          "bytes": 44404,
+          "md5": "a4b1e10da2fcb25eda387ee218fdd1d2",
+          "sha256": "2262d4e1afef50f9ff4a37354460594fcde2ac202796b330af64e6b1461ed65a"
+        },
+        {
+          "path": "readme.md",
+          "url": "https://www.hydroshare.org/resource/3143b3b1bdff48e0aaebcb4aedf02feb/data/contents/readme.md",
+          "bytes": 3099,
+          "md5": "df1155abb54a6fdefe3e83b2b22c1697",
+          "sha256": "508c9832e190589c77a9d081db3dd75d1c1aa4841383af2b9df5e6370524c198"
+        },
+        {
+          "path": "scimeta.xml",
+          "url": "https://www.hydroshare.org/hsapi/resource/3143b3b1bdff48e0aaebcb4aedf02feb/scimeta/",
+          "max_bytes": 1000000,
+          "sha256": "c877d4ab9e23b10dd18b14d2eca03f1a8454a47a1aee5404951f1d174d312d7d",
+          "bytes": 7721
+        },
+        {
+          "path": "files.json",
+          "url": "https://www.hydroshare.org/hsapi/resource/3143b3b1bdff48e0aaebcb4aedf02feb/files/",
+          "max_bytes": 1000000,
+          "sha256": "fb80aff087399d4031e6d0e1b0cf0d4aa2f433c864055037cfd96d151113e5c2",
+          "bytes": 10317
+        }
+      ],
+      "best_for": [
+        "pulse stream adapter",
+        "manual end-use classification",
+        "limited household context profiles"
+      ],
+      "limitations": [
+        "five homes are a subset of published 31-home study, not independent extra homes",
+        "raw signal is pulses; resolution field must be interpreted in source units, not automatically litres",
+        "downloaded resident metadata differs from values in associated paper; snapshot context remains unverified",
+        "TrainingDataset_SS is manual; Results/* labels are classifier outputs, not independent manual truth",
+        "short seasonal windows; no long annual seasonal validation",
+        "manual end-use labels are not leak labels",
+        "Released manual training file has 537 rows; no assumption that all 998 paper-described collected/manual events are included."
+      ],
+      "models": [
+        "P01_conditional_context",
+        "A01_behavior_reference",
+        "F02_short_horizon_only"
+      ]
+    },
+    {
+      "id": "illinois-actual-events",
+      "title": "Illinois ground-truthed end-use event features",
+      "landing_page": "https://stillwell.cee.illinois.edu/data/",
+      "license": null,
+      "reuse_gate": "dataset_license_not_yet_verified_local_inspection_only",
+      "role": "manual_end_use_event_features",
+      "files": [
+        {
+          "path": "Actual_data.csv_.zip",
+          "url": "https://stillwell.cee.illinois.edu/files/2023/11/Actual_data.csv_.zip",
+          "max_bytes": 10000000,
+          "sha256": "df340baba51e4f1d8e34d3a7cadda17ad275bf4f3160d3ca6a2976a0db72b7ef",
+          "bytes": 17740
+        },
+        {
+          "path": "publisher-data-page.html",
+          "url": "https://stillwell.cee.illinois.edu/data/",
+          "max_bytes": 1000000,
+          "sha256": "7aeb0f178027e239f496e2689683d7d518396e7e9faf8e66e974c76efb763ea3",
+          "bytes": 57912
+        }
+      ],
+      "best_for": [
+        "ground-truthed end-use event classification"
+      ],
+      "limitations": [
+        "event feature rows, not a continuous one-second demand trace",
+        "dataset license and feature unit dictionary still need confirmation",
+        "random event split can leak household/day context; group by date/home"
+      ],
+      "models": [
+        "A01_end_use_reference"
+      ]
+    },
+    {
+      "id": "illinois-atypical-events",
+      "title": "Illinois typical/atypical end-use and temperature",
+      "landing_page": "https://stillwell.cee.illinois.edu/data/",
+      "license": null,
+      "reuse_gate": "dataset_license_not_yet_verified_local_inspection_only",
+      "role": "contextual_typical_atypical_events",
+      "files": [
+        {
+          "path": "data_RSW.zip",
+          "url": "https://stillwell.cee.illinois.edu/files/2025/11/data_RSW.zip",
+          "max_bytes": 10000000,
+          "sha256": "1b0295037c3c5e711b9f8dfd60ad3df8fba9f6b947eec6420ba9f37fdad78269",
+          "bytes": 848435
+        },
+        {
+          "path": "publisher-data-page.html",
+          "url": "https://stillwell.cee.illinois.edu/data/",
+          "max_bytes": 1000000,
+          "sha256": "7aeb0f178027e239f496e2689683d7d518396e7e9faf8e66e974c76efb763ea3",
+          "bytes": 57912
+        }
+      ],
+      "best_for": [
+        "normal behavior/context change reference"
+      ],
+      "limitations": [
+        "Predicted_Label is a model prediction, not a manually verified truth despite generic landing-page wording",
+        "no per-event leak truth; contextual atypicality does not imply malfunction",
+        "README says gallons, gallons/min, seconds and Fahrenheit; exact gallon convention not yet independently resolved",
+        "dataset license not found in supplied documentation"
+      ],
+      "models": [
+        "A01_behavior_reference"
+      ]
+    },
+    {
+      "id": "illinois-showers",
+      "title": "Illinois student housing shower events",
+      "landing_page": "https://stillwell.cee.illinois.edu/data/",
+      "license": null,
+      "reuse_gate": "dataset_license_not_yet_verified_local_inspection_only",
+      "role": "observed_shower_event_distributions",
+      "files": [
+        {
+          "path": "ResidenceHall_shower-data.csv_.zip",
+          "url": "https://stillwell.cee.illinois.edu/files/2025/01/ResidenceHall_shower-data.csv_.zip",
+          "max_bytes": 10000000,
+          "sha256": "0b75726c557fb5121ffb26d3b86331d641f47151475db462715fefda4c29510a",
+          "bytes": 4967
+        },
+        {
+          "path": "publisher-data-page.html",
+          "url": "https://stillwell.cee.illinois.edu/data/",
+          "max_bytes": 1000000,
+          "sha256": "7aeb0f178027e239f496e2689683d7d518396e7e9faf8e66e974c76efb763ea3",
+          "bytes": 57912
+        }
+      ],
+      "best_for": [
+        "observed shower duration and flow distributions for a later labelled simulator"
+      ],
+      "limitations": [
+        "285 event rows are not 285 homes",
+        "no calendar dates or complete household consumption",
+        "gallons/min retained as delivered; exact conversion convention and reuse license pending"
+      ],
+      "models": [
+        "synthetic_generator_calibration_conditional"
+      ]
+    },
+    {
+      "id": "illinois-ctgan-balanced",
+      "title": "Illinois CTGAN synthetic balanced end-use features",
+      "landing_page": "https://stillwell.cee.illinois.edu/data/",
+      "license": null,
+      "reuse_gate": "dataset_license_not_yet_verified_local_inspection_only",
+      "role": "synthetic_method_comparison",
+      "files": [
+        {
+          "path": "Synthetic_data_12k_balanced.csv_.zip",
+          "url": "https://stillwell.cee.illinois.edu/files/2023/11/Synthetic_data_12k_balanced.csv_.zip",
+          "max_bytes": 10000000,
+          "sha256": "4a18220b8383f7558d02883c5616ffbe484b4ed6dd2d8fd8ee8cc3ba63f66d65",
+          "bytes": 180503
+        },
+        {
+          "path": "publisher-data-page.html",
+          "url": "https://stillwell.cee.illinois.edu/data/",
+          "max_bytes": 1000000,
+          "sha256": "7aeb0f178027e239f496e2689683d7d518396e7e9faf8e66e974c76efb763ea3",
+          "bytes": 57912
+        }
+      ],
+      "best_for": [
+        "synthetic classification method comparison"
+      ],
+      "limitations": [
+        "explicitly generated, not measured extra homes",
+        "avoid independent train/test claims against the parent household cohort",
+        "dataset license not independently verified"
+      ],
+      "models": [
+        "synthetic_method_comparison"
+      ]
+    },
+    {
+      "id": "istanbul-district-consumption",
+      "title": "Amount of Water Consumption by District",
+      "landing_page": "https://data.ibb.gov.tr/dataset/ilce-bazinda-su-tuketim-miktari",
+      "license": "ibb-license",
+      "license_url": "https://data.ibb.gov.tr/license",
+      "reuse_gate": "attribution_required_per_IMM_Open_Data_License_v1; preserve reporting_scope_and_release_conflicts",
+      "role": "separate_regional_reference_not_kocaeli",
+      "files": [
+        {
+          "path": "package.json",
+          "url": "https://data.ibb.gov.tr/api/3/action/package_show?id=ilce-bazinda-su-tuketim-miktari",
+          "max_bytes": 1000000,
+          "sha256": "4e233b6080a0400a52ac8945d68617663243435e0b363655801df45ae54947c6",
+          "bytes": 8491
+        },
+        {
+          "path": "district-2015-2022.xlsx",
+          "url": "https://data.ibb.gov.tr/dataset/7009ca22-2cda-4b3e-91a6-2c2a36ea1986/resource/b742a205-1adb-4f99-8b04-6f3025feb404/download/ilce-baznda-su-tuketim-miktar-2015-2022.xlsx",
+          "max_bytes": 10000000,
+          "sha256": "7c0d02094b3e1c1f72063cca0764f4c12ed15bc3099fae588ddec1255770ec3a",
+          "bytes": 13006
+        },
+        {
+          "path": "district-2023.xlsx",
+          "url": "https://data.ibb.gov.tr/dataset/7009ca22-2cda-4b3e-91a6-2c2a36ea1986/resource/23fac2f5-6107-47d1-975b-779dd8a30f59/download/ilce-baznda-su-tuketim-miktar-2023.xlsx",
+          "max_bytes": 10000000,
+          "sha256": "6b19583d20b120358b54f1d9f527d0ba9c7dbbeb36bcc84c6e29d09b0b9fc45e",
+          "bytes": 14603
+        },
+        {
+          "path": "district-2000-2015.xlsx",
+          "url": "https://data.ibb.gov.tr/dataset/7009ca22-2cda-4b3e-91a6-2c2a36ea1986/resource/9d67d3b9-d81f-4cb4-a99c-27c0db5e8b40/download/ilce-baznda-su-tuketim-miktar-2000-2015.xlsx",
+          "max_bytes": 10000000,
+          "sha256": "39360432206fc768e276a70f9de3eccbd60310a6fbcced8730dd0759fccf15cf",
+          "bytes": 14800
+        },
+        {
+          "path": "license.html",
+          "url": "https://data.ibb.gov.tr/license",
+          "max_bytes": 1000000,
+          "sha256": "e9ee70701398a583448fec4a43a8661cd6301d8439a20ef8a4ad268e767376d5",
+          "bytes": 28496
+        }
+      ],
+      "best_for": [
+        "independent Turkish regional consumption reference"
+      ],
+      "limitations": [
+        "Istanbul geography, not Kocaeli",
+        "annual/monthly grain must follow worksheet, no fabricated daily rows",
+        "2015 occurs in two releases; avoid double count; boundaries/district changes need review",
+        "IMM license attribution and exclusions apply",
+        "Old release includes KOCAELI and GEBZE-ISKI reporting rows; scope unresolved, not treated as complete Kocaeli demand. GOP and SALTANGAZI names are not automatically merged with other spellings."
+      ],
+      "models": [
+        "F03_separate_regional_reference"
+      ]
+    },
+    {
+      "id": "illinois-appliance-traces",
+      "title": "Illinois appliance and fixture traces",
+      "landing_page": "https://stillwell.cee.illinois.edu/appliance_csvfiles/",
+      "license": null,
+      "reuse_gate": "dataset_license_not_yet_verified_local_inspection_only",
+      "role": "observed_fixture_trace_reference",
+      "files": [
+        {
+          "path": "appliance_csvfiles.zip",
+          "url": "https://stillwell.cee.illinois.edu/files/2020/08/appliance_csvfiles.zip",
+          "max_bytes": 10000000,
+          "sha256": "b17ad054f472b342cac1ac77c78ad81c16305ca4801cc490a035984cc4dbe3d5",
+          "bytes": 149498
+        }
+      ],
+      "best_for": [
+        "fixture flow shape reference"
+      ],
+      "limitations": [
+        "relative Time has no calendar date or absolute timezone",
+        "short appliance traces not household history",
+        "readme unit definitions must be retained; dataset license not independently verified"
+      ],
+      "models": [
+        "synthetic_generator_calibration_conditional"
+      ]
+    },
+    {
+      "id": "nasa-power-kocaeli-context",
+      "title": "NASA POWER daily meteorology, selected city reference point",
+      "landing_page": "https://power.larc.nasa.gov/docs/services/api/temporal/daily/",
+      "license": null,
+      "reuse_gate": "local_reference_analysis; follow NASA referencing guide; verify formal rights basis before redistributed releases",
+      "role": "independent_climate_context_not_household_weather_or_forecast",
+      "location": {
+        "latitude": 40.77,
+        "longitude": 29.94,
+        "basis": "analyst_selected_city_reference_point_not_meter_coordinates"
+      },
+      "files": [
+        {
+          "path": "daily-1981-2025.json",
+          "url": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M,T2M_MAX,T2M_MIN,PRECTOTCORR&community=AG&longitude=29.94&latitude=40.77&start=19810101&end=20251231&format=JSON&time-standard=UTC",
+          "max_bytes": 5000000,
+          "sha256": "791687f66eba07000a56459586212797d04051310df6eed0b2d97e43b4d59469",
+          "bytes": 1075392
+        },
+        {
+          "path": "daily-api.html",
+          "url": "https://power.larc.nasa.gov/docs/services/api/temporal/daily/",
+          "max_bytes": 1000000,
+          "sha256": "e26540141248c204edf5a1381a211a6f52cddfdf6b8aaa26ce996695bcf05102",
+          "bytes": 36626
+        },
+        {
+          "path": "methodology.html",
+          "url": "https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/",
+          "max_bytes": 1000000,
+          "sha256": "39642abe741c29e9970c2561832d0eb5c53423c52ff48185ec52f2fe4bbf218d",
+          "bytes": 126969
+        },
+        {
+          "path": "referencing.html",
+          "url": "https://power.larc.nasa.gov/docs/referencing/",
+          "max_bytes": 1000000,
+          "sha256": "4c7d51d44307036fba72ce5b0a598b1b3877c6a038de326fcae9dc89b705034c",
+          "bytes": 18634
+        }
+      ],
+      "best_for": [
+        "long-term temperature and precipitation context"
+      ],
+      "limitations": [
+        "gridded assimilation/reanalysis, not direct station measurement",
+        "analyst-selected city point, not actual household coordinates",
+        "UTC daily, not Istanbul local daily; historical observations are not archived forecasts",
+        "no automatic join to foreign households; API fill sentinel -999 becomes null"
+      ],
+      "models": [
+        "F03_climate_context_only"
+      ],
+      "rights_note": "Public API access and NASA referencing guide verified; no formal dataset-specific license identifier established in downloaded response. Retain source, service version and access date."
+    },
+    {
+      "id": "aalborg-v1-reference",
+      "title": "Aalborg processed annual hourly and separate diary cohorts",
+      "landing_page": "https://zenodo.org/records/15180141",
+      "doi": "10.5281/zenodo.15180141",
+      "license": "CC-BY-4.0",
+      "reuse_gate": "retrospective_processed_reference_not_raw_online_leak_truth",
+      "role": "daily_forecast_reference_and_separate_diary_cohort",
+      "files": [
+        {
+          "path": "final_data.zip",
+          "url": "https://zenodo.org/api/records/15180141/files/final_data.zip/content",
+          "bytes": 426228,
+          "md5": "ef68f7e8ffceb2de7cb02764b057aaf4",
+          "sha256": "af2823cea25c40694c68da3057b4eb6928cfcdbdd9f6603529f8eef05d1edc50"
+        },
+        {
+          "path": "record.json",
+          "url": "https://zenodo.org/api/records/15180141",
+          "max_bytes": 1000000,
+          "sha256": "4288dac4dbf53ed997f1dbd4d58fa4953040de8158cbdfc4d9f272e0c3a9603c",
+          "bytes": 6532
+        }
+      ],
+      "best_for": [
+        "existing retrospective daily forecasting baseline",
+        "separate diary-supported patterns"
+      ],
+      "limitations": [
+        "annual10-home series and diary8-building series have distinct scope; no assertion of 18 unique households",
+        "interpolation, integer differencing and daily-minimum subtraction upstream; future-dependent processing",
+        "occupancy labels inferred from consumption excluded from predictive features",
+        "Danish Copenhagen reference clock does not change thesis Istanbul clock"
+      ],
+      "models": [
+        "F01_existing_reference",
+        "P01_conditional"
+      ]
+    }
+  ],
+  "candidates": [
+    {
+      "id": "ampds2",
+      "landing_page": "https://makonin.com/ampds/",
+      "doi": "10.7910/DVN/FIE0S4",
+      "status": "publisher_link_verified_download_api_http_403",
+      "fit": "one home, two years, multiutility; precleaned and infilled; obtain official water files and license before use"
+    },
+    {
+      "id": "utah-31homes",
+      "landing_page": "https://ascelibrary.com/doi/10.1061/%28ASCE%29WR.1943-5452.0001633",
+      "status": "broader_cohort_paper_found_raw_resource_not_located",
+      "fit": "CIWS five homes are a subset; do not count as independent extra homes"
+    },
+    {
+      "id": "leakdb",
+      "landing_page": "https://github.com/KIOS-Research/LeakDB",
+      "status": "secondary_network_scope_not_selected_for_household_training",
+      "fit": "synthetic network pressure/flow leaks; cannot validate household meter leaks"
+    },
+    {
+      "id": "kocaeli-regional",
+      "landing_page": "https://veri.kocaeli.bel.tr/",
+      "status": "no_verified_consumption_download_located",
+      "fit": "Regional drought modelling needs actual ISU regional demand and representativeness"
+    }
+  ],
+  "catalog_snapshot_policy": "Every selected file is pinned by SHA-256, including mutable resource metadata; new publisher releases require a new reviewed catalog."
+}

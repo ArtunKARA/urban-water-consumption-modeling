@@ -1,7 +1,12 @@
 # İlk model eğitim planı
 
-Durum: **planlama taslağı — eğitimler henüz çalıştırılmadı**.
-Son güncelleme: 27 Ekim 2026.
+Durum: **ana araştırma planı taslak; F01 için sınırlı açık veri deneyi çalıştırıldı**.
+Son güncelleme: 4 Kasım 2026.
+
+[Aalborg günlük referans deneyi](../daily-forecast-reference.md), ayrı Kopenhag
+takvimi ve açık erişim varsayımıyla ilk geçmiş/gün içi modellerini çalıştırdı.
+Bu kayıt tam tez planının veya model akış grafiğindeki bütün varyantların
+uygulandığı anlamına gelmez; çalıştırma kaydı ayrı deney protokolü ve sonuç JSON'undadır.
 
 Bu belge [model akış haritasının](research-data-model.md) eğitim karşılığıdır.
 Veri alanları [JSON sözleşmesinde](research-data-contract.v0.1.schema.json), bilimsel
@@ -199,3 +204,4 @@ Gerçek kimlik kodları eşleştirme içindir; varsayılan girdi özelliği değ
 | 2026-10-27 | 2 | İlk yöntem adayları, JSON planı, yeniden üretilebilir görünüm ve F03 koşullu uzantısı eklendi. Eğitimler henüz çalıştırılmadı. |
 | 2026-10-27 | 3 | Eğitim/değerlendirme rolleri, koşullu varyantlar, erişim zamanı ve referans hacim temeli MF01–MF10 denetimiyle netleştirildi. |
 | 2026-10-27 | 4 | Kullanıcı iki günlük tahmin saatini, iki profil yaklaşımını ve üç senaryo ailesini seçti. Eşlenmiş raporlama ve gün içi özellik tanımı eklendi. |
+| 2026-11-04 | 5 | F01 için ayrı Aalborg referans protokolü, zaman/hane ayrımı ve ilk point-forecast sonuçları kaydedildi; ana tez kapsamı açık tutuldu. |

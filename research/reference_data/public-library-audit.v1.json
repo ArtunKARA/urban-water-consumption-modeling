@@ -1,0 +1,595 @@
+{
+  "schema": "urban-water.public-library-audit.v1",
+  "catalog_sha256": "d6b4d336f078feb25e1ce06b4b0153fe048dbe70a6e296f21df90c7b0ab6887d",
+  "prepared_run": "var\\data-library\\prepared\\22c4329bf88a4b34b17e1879d6aab26e",
+  "prepared_profiles_sha256": "2c4e0288d0a14b468282bb9f9fc177ad182632c9dacda9db3728d67e40bcbb02",
+  "verified_csv_tables": 68,
+  "verified_derived_tables": 2,
+  "csv_records": 15951445,
+  "count_caveat": "Includes metadata and duplicate result views. Not independent training observations or unique households.",
+  "source_rows": {
+    "hsb-living-lab-v1.1": 652315,
+    "hihaigua-v2": 11515515,
+    "ciws-utah-v2026-11-04": 3623135,
+    "illinois-actual-events": 675,
+    "illinois-atypical-events": 44738,
+    "illinois-showers": 285,
+    "illinois-ctgan-balanced": 12000,
+    "istanbul-district-consumption": 0,
+    "illinois-appliance-traces": 12494,
+    "nasa-power-kocaeli-context": 0,
+    "aalborg-v1-reference": 90288
+  },
+  "hsb_boundary_check": {
+    "rows": 652315,
+    "sensors": 214,
+    "nonresidential_rows": 16416,
+    "value_sum_as_delivered": 3270.789,
+    "nonresidential_value_sum_as_delivered": 160.89800000000002,
+    "residential_value_sum_as_delivered": 3109.891,
+    "publisher_boundary": {
+      "installed_sensors": 214,
+      "residential_analysis_sensors": 208,
+      "excluded_nonresidential_sensors": 6,
+      "all_clean_records": 652315,
+      "residential_records": 635899,
+      "excluded_records": 16416,
+      "valid_days_all": 946,
+      "valid_days_residential": 946,
+      "whole_building_m3": 3270.789,
+      "residential_m3": 3109.891,
+      "nonresidential_washrooms_m3": 160.898,
+      "nonres_by_end_use_m3": {
+        "Toilet": 114.086,
+        "Washbasin": 46.812
+      }
+    },
+    "canonical_unit": null,
+    "unit_gate": "dictionary says litres; R5 code and totals treat same numbers as m3"
+  },
+  "ciws_pulse_files": [
+    {
+      "file": "CIWS_Disaggregator/RawData/summer_HH_1.csv",
+      "rows": 345601,
+      "start_utc": "2019-07-18 00:00:01+00:00",
+      "end_utc": "2019-08-02 23:59:57+00:00",
+      "pulse_sum": 702564,
+      "negative_counts": 0,
+      "steps_not_four_seconds": 2
+    },
+    {
+      "file": "CIWS_Disaggregator/RawData/summer_HH_2.csv",
+      "rows": 367951,
+      "start_utc": "2019-08-30 13:02:46+00:00",
+      "end_utc": "2019-09-16 13:52:46+00:00",
+      "pulse_sum": 178292,
+      "negative_counts": 0,
+      "steps_not_four_seconds": 0
+    },
+    {
+      "file": "CIWS_Disaggregator/RawData/summer_HH_3.csv",
+      "rows": 289663,
+      "start_utc": "2020-06-19 00:00:03+00:00",
+      "end_utc": "2020-07-02 09:50:51+00:00",
+      "pulse_sum": 656756,
+      "negative_counts": 0,
+      "steps_not_four_seconds": 0
+    },
+    {
+      "file": "CIWS_Disaggregator/RawData/summer_HH_4.csv",
+      "rows": 283690,
+      "start_utc": "2020-06-17 00:00:03+00:00",
+      "end_utc": "2020-06-30 03:12:39+00:00",
+      "pulse_sum": 2300993,
+      "negative_counts": 0,
+      "steps_not_four_seconds": 0
+    },
+    {
+      "file": "CIWS_Disaggregator/RawData/summer_HH_5.csv",
+      "rows": 312504,
+      "start_utc": "2020-06-12 12:46:25+00:00",
+      "end_utc": "2020-06-26 23:59:57+00:00",
+      "pulse_sum": 467245,
+      "negative_counts": 0,
+      "steps_not_four_seconds": 0
+    },
+    {
+      "file": "CIWS_Disaggregator/RawData/winter_HH_1.csv",
+      "rows": 431944,
+      "start_utc": "2019-11-01 00:00:03+00:00",
+      "end_utc": "2019-11-20 23:59:57+00:00",
+      "pulse_sum": 432392,
+      "negative_counts": 0,
+      "steps_not_four_seconds": 2
+    },
+    {
+      "file": "CIWS_Disaggregator/RawData/winter_HH_2.csv",
+      "rows": 280790,
+      "start_utc": "2020-03-18 00:00:03+00:00",
+      "end_utc": "2020-03-30 23:59:59+00:00",
+      "pulse_sum": 49316,
+      "negative_counts": 0,
+      "steps_not_four_seconds": 1
+    },
+    {
+      "file": "CIWS_Disaggregator/RawData/winter_HH_3.csv",
+      "rows": 302377,
+      "start_utc": "2019-11-07 00:00:03+00:00",
+      "end_utc": "2019-11-20 23:59:58+00:00",
+      "pulse_sum": 93122,
+      "negative_counts": 0,
+      "steps_not_four_seconds": 1
+    },
+    {
+      "file": "CIWS_Disaggregator/RawData/winter_HH_4.csv",
+      "rows": 302381,
+      "start_utc": "2019-11-09 00:00:03+00:00",
+      "end_utc": "2019-11-22 23:59:59+00:00",
+      "pulse_sum": 93019,
+      "negative_counts": 0,
+      "steps_not_four_seconds": 1
+    },
+    {
+      "file": "CIWS_Disaggregator/RawData/winter_HH_5.csv",
+      "rows": 496774,
+      "start_utc": "2019-11-09 00:00:00+00:00",
+      "end_utc": "2019-12-02 00:00:00+00:00",
+      "pulse_sum": 80479,
+      "negative_counts": 0,
+      "steps_not_four_seconds": 2
+    }
+  ],
+  "ciws_manual_released_rows": 537,
+  "ciws_manual_label_counts": {
+    "faucet": 194,
+    "shower": 87,
+    "bathtub": 4,
+    "clothwasher": 50,
+    "irrigation": 100,
+    "toilet": 102
+  },
+  "hihaigua_field_water_streams": [
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_0/ts.csv",
+      "device_type": "hotWater",
+      "entity_id": "0b2ab620b013bc05a202b16e94a3be54",
+      "rows": 73227,
+      "epoch_ms_min": 1735689983954,
+      "epoch_ms_max": 1767225225866,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 73226,
+      "gaps_over_10_5_minutes": 631,
+      "value_min_source_units": 18.118,
+      "value_max_source_units": 45.996
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_0/ts.csv",
+      "device_type": "water",
+      "entity_id": "9f8b9fc1f350756ccfb57ec63e204fb7",
+      "rows": 73238,
+      "epoch_ms_min": 1735689936747,
+      "epoch_ms_max": 1767225231107,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 73237,
+      "gaps_over_10_5_minutes": 621,
+      "value_min_source_units": 26.69,
+      "value_max_source_units": 63.983
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_1/ts.csv",
+      "device_type": "hotWater",
+      "entity_id": "aaa6a449913d75dd2bbdfffa867e14bb",
+      "rows": 67204,
+      "epoch_ms_min": 1735689719647,
+      "epoch_ms_max": 1767225491240,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 67203,
+      "gaps_over_10_5_minutes": 5467,
+      "value_min_source_units": 9.563,
+      "value_max_source_units": 28.968
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_1/ts.csv",
+      "device_type": "water",
+      "entity_id": "470137573a02058b51c0d80d1e415098",
+      "rows": 67208,
+      "epoch_ms_min": 1735689675049,
+      "epoch_ms_max": 1767225493861,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 67207,
+      "gaps_over_10_5_minutes": 5460,
+      "value_min_source_units": 25.62,
+      "value_max_source_units": 61.664
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_2/ts.csv",
+      "device_type": "hotWater",
+      "entity_id": "1dc0ba5d164202232698e19b8473ea49",
+      "rows": 73604,
+      "epoch_ms_min": 1735689627345,
+      "epoch_ms_max": 1767225406603,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 73603,
+      "gaps_over_10_5_minutes": 588,
+      "value_min_source_units": 16.92,
+      "value_max_source_units": 41.549
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_2/ts.csv",
+      "device_type": "water",
+      "entity_id": "506a269c5e7f3af96b2b542d150b439b",
+      "rows": 73604,
+      "epoch_ms_min": 1735689645776,
+      "epoch_ms_max": 1767225411843,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 73603,
+      "gaps_over_10_5_minutes": 591,
+      "value_min_source_units": 23.92,
+      "value_max_source_units": 58.644
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_3/ts.csv",
+      "device_type": "hotWater",
+      "entity_id": "6f230454a5c6c2ea35eb0c23192db012",
+      "rows": 73635,
+      "epoch_ms_min": 1735689922591,
+      "epoch_ms_max": 1767225210879,
+      "nonfinite_or_missing_values": 1,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 73632,
+      "gaps_over_10_5_minutes": 638,
+      "value_min_source_units": 3.482,
+      "value_max_source_units": 9.556
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_3/ts.csv",
+      "device_type": "water",
+      "entity_id": "d74d8d51614e66db06c08bf5208d36f1",
+      "rows": 73641,
+      "epoch_ms_min": 1735689940936,
+      "epoch_ms_max": 1767225213500,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 73640,
+      "gaps_over_10_5_minutes": 633,
+      "value_min_source_units": 15.643,
+      "value_max_source_units": 40.405
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_4/ts.csv",
+      "device_type": "hotWater",
+      "entity_id": "53a40b34dc97f289eb5ad791734186d7",
+      "rows": 72886,
+      "epoch_ms_min": 1735689633570,
+      "epoch_ms_max": 1767225307606,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 72885,
+      "gaps_over_10_5_minutes": 711,
+      "value_min_source_units": 8.827,
+      "value_max_source_units": 19.948
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_4/ts.csv",
+      "device_type": "water",
+      "entity_id": "8074d4d8c45413a97f6e396cfe584cae",
+      "rows": 72873,
+      "epoch_ms_min": 1735689651922,
+      "epoch_ms_max": 1767225310229,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 72872,
+      "gaps_over_10_5_minutes": 724,
+      "value_min_source_units": 15.349,
+      "value_max_source_units": 42.886
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_5/ts.csv",
+      "device_type": "hotWater",
+      "entity_id": "774951c4ea0de505731b91735237ae0b",
+      "rows": 70236,
+      "epoch_ms_min": 1735690017932,
+      "epoch_ms_max": 1767225406333,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 1,
+      "valid_adjacent_pairs": 70235,
+      "gaps_over_10_5_minutes": 769,
+      "value_min_source_units": 13.852,
+      "value_max_source_units": 41.347
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_5/ts.csv",
+      "device_type": "water",
+      "entity_id": "e2bbabb444c2d9f138ed6133a5365580",
+      "rows": 70262,
+      "epoch_ms_min": 1735689996942,
+      "epoch_ms_max": 1767225408953,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 70261,
+      "gaps_over_10_5_minutes": 747,
+      "value_min_source_units": 29.707,
+      "value_max_source_units": 67.253
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_6/ts.csv",
+      "device_type": "hotWater",
+      "entity_id": "258f559cc4dc07b5685fc6bcdbb3f6e7",
+      "rows": 72621,
+      "epoch_ms_min": 1735689964582,
+      "epoch_ms_max": 1767225278128,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 72620,
+      "gaps_over_10_5_minutes": 654,
+      "value_min_source_units": 24.837,
+      "value_max_source_units": 72.673
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_6/ts.csv",
+      "device_type": "water",
+      "entity_id": "3c4852853229f6479932572aaf8bdfd8",
+      "rows": 72617,
+      "epoch_ms_min": 1735689967202,
+      "epoch_ms_max": 1767225283368,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 72616,
+      "gaps_over_10_5_minutes": 657,
+      "value_min_source_units": 45.003,
+      "value_max_source_units": 122.765
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_7/ts.csv",
+      "device_type": "hotWater",
+      "entity_id": "57678dd6c32b65b37df52c9a08029cb0",
+      "rows": 73511,
+      "epoch_ms_min": 1735689955014,
+      "epoch_ms_max": 1767225335249,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 73510,
+      "gaps_over_10_5_minutes": 669,
+      "value_min_source_units": 15.77,
+      "value_max_source_units": 42.16
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_7/ts.csv",
+      "device_type": "water",
+      "entity_id": "89f7dec62c99bdeb4222c69e22f7363c",
+      "rows": 73515,
+      "epoch_ms_min": 1735689957633,
+      "epoch_ms_max": 1767225340480,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 73514,
+      "gaps_over_10_5_minutes": 662,
+      "value_min_source_units": 33.27,
+      "value_max_source_units": 88.273
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_8/ts.csv",
+      "device_type": "hotWater",
+      "entity_id": "026eba6254230d5c309071cad4c157f2",
+      "rows": 73245,
+      "epoch_ms_min": 1735689908327,
+      "epoch_ms_max": 1767225521130,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 73244,
+      "gaps_over_10_5_minutes": 658,
+      "value_min_source_units": 18.981,
+      "value_max_source_units": 51.03699999999999
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_8/ts.csv",
+      "device_type": "water",
+      "entity_id": "a9bdf4529073cb2910adbe9e01e0ecb3",
+      "rows": 73245,
+      "epoch_ms_min": 1735689910946,
+      "epoch_ms_max": 1767225523750,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 73244,
+      "gaps_over_10_5_minutes": 658,
+      "value_min_source_units": 38.13,
+      "value_max_source_units": 100.012
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_9/ts.csv",
+      "device_type": "hotWater",
+      "entity_id": "0226fbac59599a120be18fe2017c76f9",
+      "rows": 73721,
+      "epoch_ms_min": 1735689746237,
+      "epoch_ms_max": 1767225390156,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 73720,
+      "gaps_over_10_5_minutes": 682,
+      "value_min_source_units": 9.527,
+      "value_max_source_units": 25.999000000000002
+    },
+    {
+      "file": "hihAigua_dataset.zip!hihAigua_dataset/installation_9/ts.csv",
+      "device_type": "water",
+      "entity_id": "ccaeb839aff9e2dfba23dc441f11d7c1",
+      "rows": 73701,
+      "epoch_ms_min": 1735689790784,
+      "epoch_ms_max": 1767225395398,
+      "nonfinite_or_missing_values": 0,
+      "nonincreasing_timestamps": 0,
+      "counter_decreases": 0,
+      "valid_adjacent_pairs": 73700,
+      "gaps_over_10_5_minutes": 696,
+      "value_min_source_units": 18.888,
+      "value_max_source_units": 53.523
+    }
+  ],
+  "hihaigua_lab_label_counts": {
+    "shower": 70,
+    "washing machine": 17,
+    "wc": 30
+  },
+  "benchmark_assessment": {
+    "benchmark_run": "7e387da7b7fb45c4871ad8b78121837f",
+    "mae_temporal_23": {
+      "seasonal_naive": {
+        "scope": "temporal",
+        "issuance_hour": 23,
+        "split": "test",
+        "method": "seasonal_naive",
+        "n": 600,
+        "mae_liters": 106.51,
+        "rmse_liters": 153.4025858104528,
+        "wape": 0.43645378736656626,
+        "wape_status": "defined",
+        "interval_coverage": null,
+        "interval_status": "point_forecasts_only"
+      },
+      "history_only": {
+        "scope": "temporal",
+        "issuance_hour": 23,
+        "split": "test",
+        "method": "history_only",
+        "n": 600,
+        "mae_liters": 84.90072029351452,
+        "rmse_liters": 119.85255073525694,
+        "wape": 0.3479038674514497,
+        "wape_status": "defined",
+        "interval_coverage": null,
+        "interval_status": "point_forecasts_only"
+      },
+      "intraday": {
+        "scope": "temporal",
+        "issuance_hour": 23,
+        "split": "test",
+        "method": "history_plus_intraday",
+        "n": 600,
+        "mae_liters": 83.49411400778476,
+        "rmse_liters": 116.2417350759042,
+        "wape": 0.3421399143884474,
+        "wape_status": "defined",
+        "interval_coverage": null,
+        "interval_status": "point_forecasts_only"
+      }
+    },
+    "mae_holdout_23": {
+      "history_only": {
+        "scope": "household_holdout",
+        "issuance_hour": 23,
+        "split": "test",
+        "method": "history_only",
+        "n": 120,
+        "mae_liters": 110.46161671743106,
+        "rmse_liters": 147.62947043744154,
+        "wape": 0.5044677274353679,
+        "wape_status": "defined",
+        "interval_coverage": null,
+        "interval_status": "point_forecasts_only"
+      },
+      "intraday": {
+        "scope": "household_holdout",
+        "issuance_hour": 23,
+        "split": "test",
+        "method": "history_plus_intraday",
+        "n": 120,
+        "mae_liters": 111.91004040789963,
+        "rmse_liters": 150.01472435348734,
+        "wape": 0.5110825410621082,
+        "wape_status": "defined",
+        "interval_coverage": null,
+        "interval_status": "point_forecasts_only"
+      }
+    },
+    "improvement_pct_vs_weekly_naive": 21.60913152963595,
+    "incremental_improvement_pct_vs_history": 1.6567660213799296,
+    "holdout_intraday_error_increase_pct_vs_history": 1.311246144598588,
+    "decision": "Retrospective baseline; external validation and raw-data semantics unresolved",
+    "next_experiment_rule": "New frozen external-cohort protocol. Do not tune against the consumed Aalborg test and then report it as untouched."
+  },
+  "regional": {
+    "rows": 1448,
+    "output_sha256": "61383ab7bbb4baef54c3e3b33408828f0974c2db91b08d34eb42f51e05242a48",
+    "snapshot_sha256": "833833e425b230cd6c155f7793232f172402dac5119de40631ec369f90547d60",
+    "conflicting_values": 37,
+    "aggregation_policy": "Keep releases, years, months and publisher totals separate"
+  },
+  "weather": {
+    "rows": 16436,
+    "parameters": {
+      "T2M": {
+        "units": "C",
+        "longname": "Temperature at 2 Meters"
+      },
+      "T2M_MAX": {
+        "units": "C",
+        "longname": "Temperature at 2 Meters Maximum"
+      },
+      "T2M_MIN": {
+        "units": "C",
+        "longname": "Temperature at 2 Meters Minimum"
+      },
+      "PRECTOTCORR": {
+        "units": "mm/day",
+        "longname": "Precipitation Corrected"
+      }
+    },
+    "header": {
+      "title": "NASA/POWER Source Native Resolution Daily Data",
+      "api": {
+        "version": "v2.10.2",
+        "name": "POWER Daily API"
+      },
+      "sources": [
+        "MERRA2",
+        "POWER"
+      ],
+      "fill_value": -999.0,
+      "time_standard": "UTC",
+      "start": "19810101",
+      "end": "20251231"
+    },
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        29.94,
+        40.77,
+        162.45
+      ]
+    },
+    "null_counts": {
+      "T2M": 0,
+      "T2M_MAX": 0,
+      "T2M_MIN": 0,
+      "PRECTOTCORR": 0
+    },
+    "output_sha256": "13ba1d2f59919c5dac23035b0ad0f1466f60c048088fd1d4f69ac37c71673093",
+    "date_min": "19810101",
+    "date_max": "20251231"
+  }
+}

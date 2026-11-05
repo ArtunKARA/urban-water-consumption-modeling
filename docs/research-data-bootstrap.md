@@ -1,8 +1,17 @@
 # Sentetik veri, açık araştırma verisi ve sağlayıcı API'si
 
-Tarih: 4 Kasım 2026. Durum: **Aalborg yıllık kohortu ortak katmana bağlandı;
-eğitimler sonraki iş**. [Çalışan kaynak yolu](source-adapters-usage.md),
-[Aalborg aktarım sonucu ve sınırları](aalborg-reference.md).
+Tarih: 4 Kasım 2026. Durum: **Aalborg yıllık kohortu bağlandı; sınırlı ilk günlük
+tahmin deneyi çalıştırıldı**. [Çalışan kaynak yolu](source-adapters-usage.md),
+[Aalborg aktarımı](aalborg-reference.md), [ilk günlük deney](daily-forecast-reference.md).
+
+4 Kasım genişletmesi: [açık veri kütüphanesinde](public-data-library.md) 56 dosya
+indirildi, kaynak bazında Parquet'e hazırlandı ve 51 planlama alanıyla
+karşılaştırıldı. Bu aşağıdaki ilk aday taramasından daha güncel kaynak incelemesidir;
+HSB birim çelişkisi, CIWS metadata farkları ve yeni kaynakların eğitim kapıları oradadır.
+
+[hihAigua adaptörü](hihaigua-reference.md) bu kütüphaneden 20 su akışını ayrı
+hazırlıyor. Ortak CSV kabul/yayın yolu kontrollü fixture ile doğrulandı;
+gerçek kaynağın kanonik yayını ve model eğitimi birim/kapsama kararı bekliyor.
 
 Amaç: Önce sentetik veriyle, sonra erişilebilir bir araştırma veri setiyle,
 sonunda kurum API'siyle aynı araştırma kodunu çalıştırmak. Kaynak değişimini
@@ -111,8 +120,9 @@ etkilenmesi nedeniyle canlı tahmin başarısı ayrıca doğrulanmalıdır.
 
 4 Kasım durumu: 1 ve 2 tamamlandı. 6'nın dosya/tek HTTP nesnesi karşılaştırması
 önceki teslimatta geçti; sayfalama/cursor desteklenmiş sayılmaz. 3 için saatlik
-ve günlük snapshot'lar hazır; veri bölmeleri ve model karşılaştırması henüz
-çalıştırılmadı. Kaynak toplamı 915.140 litre, 87.360 kayıt ve 10 hane ile korundu.
+ve günlük snapshot'lar, zaman/hane bölmeleri ve ilk model karşılaştırması
+tamamlandı; kapsam işlenmiş seri üzerinde geriye dönük günlük tahmindir.
+Kaynak toplamı 915.140 litre, 87.360 kayıt ve 10 hane ile korundu.
 
 İlk küçük karşılaştırma, ilk **kapsamlı** sentetik teslimatın kabul edilen üç
 araştırma hattını daraltmaz. P01'in iki yaklaşımı, F01'in 18:00/23:00 ayrı
@@ -159,5 +169,6 @@ sürümü kabulde sabitlenir. Ayrı `UW_ENV=public_research` ortamı kaynak tara
 aileleriyle henüz CLI girdisi değildir. Aalborg'a özel dönem/zaman eşlemesi ve
 açık yıllık kohortun içeri alınması 4 Kasım'da tamamlandı. Kaynak alımı
 `research_archive_import`, hacim anlamı `upstream_processed_volume` olarak
-manifestlere işlendi. Sentetik kalibrasyon ve model eğitimleri henüz yapılmadı.
-Kontrollü HTTP kanıtı kurum API'si doğrulaması değildir.
+manifestlere işlendi. İlk F01 geçmiş/gün içi referans modelleri ayrı protokolle
+eğitildi. Sentetik kalibrasyon, bağlamlı/saatlik modeller ve kalan tez deneyleri
+sonraki iştir. Kontrollü HTTP kanıtı kurum API'si doğrulaması değildir.

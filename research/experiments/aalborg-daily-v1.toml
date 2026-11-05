@@ -1,0 +1,30 @@
+experiment_id = "aalborg-daily-v1"
+model_flow = "F01"
+scope = "retrospective comparison of the published preprocessed series"
+timezone = "Europe/Copenhagen"
+issuance_hours = [18, 23]
+lookback_days = 28
+availability_delay_minutes = 0
+availability_rule = "interval_end plus assumed delay strictly before issuance"
+availability_basis = "counterfactual hourly availability; historical provider receipt not published"
+value_semantics = "upstream_processed_volume"
+seed = 42
+
+[split]
+train_start = "2022-01-01"
+validation_start = "2022-09-01"
+test_start = "2022-11-01"
+end_exclusive = "2023-01-01"
+# Predeclared expanding origins; earlier test observations may train the December model
+# only after those observations have occurred. Model settings never change using test scores.
+test_refit_dates = ["2022-11-01", "2022-12-01"]
+holdout_households = ["AALBORG-D-09", "AALBORG-D-10"]
+
+[model]
+loss = "poisson"
+max_iter = 100
+learning_rate = 0.1
+max_leaf_nodes = 31
+min_samples_leaf = 20
+early_stopping = false
+random_state = 42

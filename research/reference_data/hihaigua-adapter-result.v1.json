@@ -1,0 +1,85 @@
+{
+  "schema": "urban-water.hihaigua-prepared.v1",
+  "policy_sha256": "b8ef0a75fbbdc214f26312240acc54dd4990616684143508c833bea609f8ab5a",
+  "code_sha256": "53df8fe782f8cafe880cde7928beb590dc9401ba83c48c865e5c7368b272e180",
+  "archive_sha256": "5d80ae27cedec13d24689b043cfc414826f27aaeb06feb42979d4788a39135ad",
+  "archive_received_at": "2026-11-04T13:23:00.708184+00:00",
+  "receipt_basis": "research_archive_import",
+  "timezone": "UTC",
+  "field_households": 10,
+  "native_field_rows_scanned": 10132219,
+  "artifacts": [
+    {
+      "path": "hotWater\\counters.parquet",
+      "sha256": "ae07c74ffcb11a3bee08a1e3c74986b3265961f4864d9788f49693d5cb396eef",
+      "bytes": 21535043
+    },
+    {
+      "path": "water\\counters.parquet",
+      "sha256": "6bc64404d59c40c1abef51b2838a8724e0baa113482d5441fac6429aefafa315",
+      "bytes": 22972105
+    }
+  ],
+  "model_ready": false,
+  "whole_household_total_available": false,
+  "numeric_transform": {
+    "raw_counter": "exact source decimal, up to 40 fractional digits; source text retained",
+    "contract_value": "9 fractional digits, Decimal ROUND_HALF_EVEN",
+    "maximum_absolute_adjustment_source_units": "0.0000000005",
+    "litre_conversion": "blocked until component unit evidence is verified"
+  },
+  "scope": "field-only counter components; no lab or other utility telemetry",
+  "prepared_directory": "var\\research\\hihaigua\\v2\\prepared\\b8ef0a75fbbd-53df8fe782f8",
+  "status": "native_prepared_canonical_publication_blocked_units_unverified",
+  "components": {
+    "hotWater": {
+      "rows": 723890,
+      "quality_counts": {
+        "unit_unverified": 723890,
+        "observation_gap": 11467,
+        "canonical_precision_adjusted": 98970,
+        "missing_counter": 1,
+        "previous_counter_unusable": 1,
+        "counter_decrease": 1
+      },
+      "unit_review": {
+        "status": "pending",
+        "unit": null,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "note": "Hydraulic relationship to water is unresolved. Never sum the two into a household total automatically."
+      },
+      "canonical_ready": false
+    },
+    "water": {
+      "rows": 723904,
+      "quality_counts": {
+        "unit_unverified": 723904,
+        "observation_gap": 11449
+      },
+      "unit_review": {
+        "status": "pending",
+        "unit": null,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "note": "Public release names the hardware but does not explicitly identify the numeric volume unit. No litre conversion is inferred."
+      },
+      "canonical_ready": false
+    }
+  },
+  "maximum_observed_contract_adjustment_source_units": {
+    "hotWater": "2.00000000000000000000000000E-14",
+    "water": "0"
+  },
+  "prior_library_inventory_matches": true,
+  "tests": {
+    "full_suite_passed": 265,
+    "skipped": 0,
+    "real_public_archive_prepared": true,
+    "real_public_archive_ingested": false,
+    "controlled_fixture_postgres_proof": true,
+    "notebook_code_cells_executed": 3,
+    "notebook_errors": 0,
+    "real_canonical_gate_exit_code": 2
+  }
+}

@@ -1,0 +1,438 @@
+{
+  "schema": "urban-water.public-field-coverage.v1",
+  "planning_map": "docs/contracts/model-flow-map.v0.1.json",
+  "review_date": "2026-11-04",
+  "policy": "Coverage denotes research references, not populated institutional fields. Synthetic, manual, predicted, controlled-lab and observed data remain distinct.",
+  "field_count": 51,
+  "fields": {
+    "H01": {
+      "label": "Hanede kalan kişi sayısı",
+      "logical_source": "survey",
+      "status": "partial_reference",
+      "references": [
+        "ciws:Sites_ResidentialStudy_Info.csv.N_Residents"
+      ],
+      "note": "Foreign household metadata only; released resident counts differ from associated paper. Not an ISU survey response."
+    },
+    "H03": {
+      "label": "Gündüz evde bulunan kişi sayısı",
+      "logical_source": "survey",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "H04": {
+      "label": "Yıl boyu / dönemsel kullanım",
+      "logical_source": "survey",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "G01": {
+      "label": "Gelir bandı — kesin maaş değil",
+      "logical_source": "survey",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "K01": {
+      "label": "Konut türü",
+      "logical_source": "survey",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "K03": {
+      "label": "Konut alanı bandı",
+      "logical_source": "survey",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "K05": {
+      "label": "Özel bahçe / sulanan alan var mı?",
+      "logical_source": "survey",
+      "status": "partial_reference",
+      "references": [
+        "ciws:Sites_ResidentialStudy_Info.csv.IrrigationType"
+      ],
+      "note": "Irrigation type is context; not a verified answer to garden-area or metered-supply questions."
+    },
+    "K06": {
+      "label": "Bahçe suyu izlenen sayaçtan mı?",
+      "logical_source": "survey",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "K08": {
+      "label": "Sayaç yalnız bu haneyi mi ölçüyor?",
+      "logical_source": "survey",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "K09": {
+      "label": "Alternatif su kaynağı",
+      "logical_source": "survey",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "K10": {
+      "label": "Su deposu var mı?",
+      "logical_source": "survey",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "E01": {
+      "label": "Çamaşır / bulaşık / arıtma cihazı varlığı",
+      "logical_source": "survey",
+      "status": "partial_reference",
+      "references": [
+        "hsb:attached_to",
+        "illinois-appliance-traces:fixture filenames"
+      ],
+      "note": "Observed fixtures are partial inventory, not a complete household appliance ownership survey."
+    },
+    "D07": {
+      "label": "Son 30 günde bildirilen kaçak",
+      "logical_source": "survey",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "O01": {
+      "label": "Misafir / boş kalma / tadilat gibi olay",
+      "logical_source": "survey",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "consent": {
+      "label": "Katılım onay durumu",
+      "logical_source": "survey",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "installation_consent": {
+      "label": "Kurulum onay durumu",
+      "logical_source": "survey",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "home_category": {
+      "label": "Aile / bekar / öğrenci hane kategorisi",
+      "logical_source": "profiles",
+      "status": "partial_reference",
+      "references": [
+        "hsb:apartment/room_type",
+        "illinois-showers:publisher population description"
+      ],
+      "note": "Study population context, not a person or household category inferred from consumption."
+    },
+    "dwelling_type": {
+      "label": "Kurumsal konut sınıfı",
+      "logical_source": "profiles",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "household_size": {
+      "label": "Kurumsal hane nüfusu — 8+ korunur",
+      "logical_source": "profiles",
+      "status": "partial_reference",
+      "references": [
+        "ciws:Sites_ResidentialStudy_Info.csv.N_Residents"
+      ],
+      "note": "Source context needs paper/release reconciliation. Preserve values including 8 residents; do not cap at 7."
+    },
+    "pets": {
+      "label": "Evcil hayvan kategorisi",
+      "logical_source": "profiles",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "legacy_income": {
+      "label": "Eski gelir sınıfı — G01 ile aynı değil",
+      "logical_source": "profiles",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "age": {
+      "label": "Kişi yaş bandı",
+      "logical_source": "profiles",
+      "status": "partial_reference",
+      "references": [
+        "ciws:Sites_ResidentialStudy_Info.csv.N_Residents_*"
+      ],
+      "note": "Household age-band counts only, not person-level age records. No invented member identities."
+    },
+    "gender": {
+      "label": "Kaynak cinsiyet kategorisi",
+      "logical_source": "profiles",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "marital": {
+      "label": "Medeni durum kategorisi",
+      "logical_source": "profiles",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "education": {
+      "label": "Eğitim kategorisi",
+      "logical_source": "profiles",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "activity": {
+      "label": "Faaliyet / çalışma kategorisi",
+      "logical_source": "profiles",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "raw": {
+      "label": "Pulse / endeks / dönem okuması ve zamanı",
+      "logical_source": "meter",
+      "status": "available_reference",
+      "references": [
+        "ciws:RawData/*.csv.time,pulses",
+        "hihaigua:ts.csv.entity_id,key,ts,value",
+        "hsb:timestamp,sensor_id,value",
+        "aalborg:daily_data.csv.date_time,water"
+      ],
+      "note": "Several incompatible signal semantics. HSB/Aalborg upstream processing retained. No common volume conversion by guess."
+    },
+    "device": {
+      "label": "Varsa heartbeat / bağlantı / arıza durumu",
+      "logical_source": "meter",
+      "status": "partial_reference",
+      "references": [
+        "hihaigua:ts.csv.errorFlags + devs.csv.type"
+      ],
+      "note": "errorFlags belongs to the associated device family; not evidence of water-meter heartbeat or transport quality."
+    },
+    "configuration": {
+      "label": "Litre/pulse ve konfigürasyon geçerliliği",
+      "logical_source": "registry",
+      "status": "partial_reference",
+      "references": [
+        "ciws:Sites_ResidentialStudy_Info.csv.MeterResolution"
+      ],
+      "note": "Source resolution needs units and metadata reconciliation. No validity-dated institutional litre/pulse configuration supplied."
+    },
+    "mapping": {
+      "label": "Sayaç → kurulum → ölçüm noktası → hane",
+      "logical_source": "registry",
+      "status": "partial_reference",
+      "references": [
+        "hihaigua:devs.csv._id,installation,asset,type",
+        "hsb:sensor_id,apartment,cluster_name"
+      ],
+      "note": "Source-local links only. No subscription/installation-to-ISU-household crosswalk."
+    },
+    "scope": {
+      "label": "Tek hane / ortak / bilinmeyen ölçüm kapsamı",
+      "logical_source": "registry",
+      "status": "partial_reference",
+      "references": [
+        "hsb:room_type,cluster_name",
+        "hihaigua:installation_*/devs.csv"
+      ],
+      "note": "Private/shared/nonresidential and cold/hot/HVAC streams require separate scope. No water+hotWater automatic sum."
+    },
+    "area": {
+      "label": "Bölge ve üst bölge kodu",
+      "logical_source": "registry",
+      "status": "partial_reference",
+      "references": [
+        "istanbul:district",
+        "hihaigua:devs.csv.asset"
+      ],
+      "note": "Istanbul district identity and Spanish site assets are separate namespaces; none are Kocaeli household locations."
+    },
+    "meter_model": {
+      "label": "Sayaç teknolojisi ve model kodu",
+      "logical_source": "registry",
+      "status": "partial_reference",
+      "references": [
+        "ciws:Sites_ResidentialStudy_Info.csv.MeterBrand,MeterSize",
+        "hihaigua:publisher hardware metadata"
+      ],
+      "note": "Foreign hardware references; no Manas model or calibrated error curve inferred."
+    },
+    "monthly": {
+      "label": "Kodlanmış aboneliğin dönem tüketimi",
+      "logical_source": "billing",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "regional": {
+      "label": "Bağımsız bölgesel tüketim ve kapsamı",
+      "logical_source": "billing",
+      "status": "available_reference",
+      "references": [
+        "istanbul:district-2000-2015.xlsx",
+        "istanbul:district-2015-2022.xlsx",
+        "istanbul:district-2023.xlsx"
+      ],
+      "note": "Annual 2000-2022 plus monthly 2023. Preserve conflicting overlapping 2015 releases and publisher totals separately. Not ISU regional demand."
+    },
+    "temperature": {
+      "label": "Sıcaklık",
+      "logical_source": "weather",
+      "status": "available_reference",
+      "references": [
+        "nasa:properties.parameter.T2M,T2M_MAX,T2M_MIN",
+        "hihaigua:ambientSensor/ts.csv.temperature",
+        "illinois-atypical-events:temps_DiD_compiled.csv"
+      ],
+      "note": "Celsius NASA and Fahrenheit Illinois have different geography/clock; only metadata-backed conversions allowed."
+    },
+    "rain": {
+      "label": "Yağış",
+      "logical_source": "weather",
+      "status": "available_reference",
+      "references": [
+        "nasa:properties.parameter.PRECTOTCORR"
+      ],
+      "note": "Selected city reference grid, mm/day, UTC. Reanalysis context, not station truth or issuance-time forecast."
+    },
+    "drought": {
+      "label": "Varsa kuraklık indeksi",
+      "logical_source": "weather",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "weather_issued": {
+      "label": "Hava yayım / erişim zamanı kontrolü",
+      "logical_source": "weather",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "curve": {
+      "label": "Debiye göre işaretli hata eğrisi",
+      "logical_source": "reference",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    },
+    "events": {
+      "label": "Tarihli olay ve kanıt türü",
+      "logical_source": "survey",
+      "status": "partial_reference",
+      "references": [
+        "ciws:TrainingDataset_SS.csv.Label",
+        "hihaigua:lab-generated/labels.csv",
+        "illinois-actual-events:label"
+      ],
+      "note": "End-use labels with source-specific provenance. No verified leak/guest/vacancy/renovation household-event truth."
+    },
+    "liters": {
+      "label": "Türetilen saatlik / günlük litre",
+      "logical_source": "meter",
+      "status": "derived_pending",
+      "references": [
+        "ciws:pulses + validated resolution",
+        "hihaigua:volume counters after units/topology/clock validation",
+        "aalborg:existing processed reference adapter"
+      ],
+      "note": "Existing Aalborg retrospective processed litres work. New sources are retained as delivered until semantic gates pass."
+    },
+    "coverage": {
+      "label": "Türetilen kapsama / kalite durumu",
+      "logical_source": "meter",
+      "status": "derived_pending",
+      "references": [
+        "raw timestamp gaps",
+        "hsb:upstream cleaning evidence"
+      ],
+      "note": "Temporal completeness can be measured; absence is not proof of zero use or provider outage."
+    },
+    "shape": {
+      "label": "Saatlere göre tüketim payları",
+      "logical_source": "meter",
+      "status": "derived_pending",
+      "references": [
+        "validated canonical volume + coverage"
+      ],
+      "note": "Do not pool fixture/event and whole-house scopes."
+    },
+    "daily_history": {
+      "label": "Günlük gecikmeler ve hareketli özetler",
+      "logical_source": "meter",
+      "status": "derived_pending",
+      "references": [
+        "validated canonical daily volume"
+      ],
+      "note": "Existing Aalborg baseline available; external cohort adapters still pending."
+    },
+    "intraday_history": {
+      "label": "Tahmin saatine kadar gün içi tüketim",
+      "logical_source": "meter",
+      "status": "derived_pending",
+      "references": [
+        "validated canonical intervals + as-of rules"
+      ],
+      "note": "Actual historical publication/arrival times absent; online availability is an explicit research assumption."
+    },
+    "hourly_history": {
+      "label": "Saatlik gecikmeler ve hareketli özetler",
+      "logical_source": "meter",
+      "status": "derived_pending",
+      "references": [
+        "validated canonical hourly volume"
+      ],
+      "note": "Hour bucket boundaries must follow source clock and volume conservation."
+    },
+    "calendar": {
+      "label": "Saat / haftanın günü / ay",
+      "logical_source": "meter",
+      "status": "derived_pending",
+      "references": [
+        "source epoch/timestamp + verified research timezone"
+      ],
+      "note": "Do not apply Europe/Istanbul to foreign cohorts automatically."
+    },
+    "anomaly_features": {
+      "label": "Pencere hacmi / gece payı / değişim",
+      "logical_source": "meter",
+      "status": "derived_pending",
+      "references": [
+        "validated canonical volume, flow, coverage"
+      ],
+      "note": "Candidate features are not evidence of a confirmed leak."
+    },
+    "flow_profile": {
+      "label": "Çözünürlük uygunsa debi–hacim dağılımı",
+      "logical_source": "meter",
+      "status": "partial_reference",
+      "references": [
+        "illinois-appliance-traces:Flow,Volume,Time",
+        "illinois-showers:Average Flow,Duration",
+        "ciws:pulses/time"
+      ],
+      "note": "Relative fixture traces and event averages are available; unit, resolution and population differences remain explicit."
+    },
+    "anomaly_output": {
+      "label": "Anomali adayı, skor ve zaman aralığı",
+      "logical_source": "upstream",
+      "status": "unavailable",
+      "references": [],
+      "note": "No verified equivalent in the selected public releases; do not invent a value."
+    }
+  }
+}

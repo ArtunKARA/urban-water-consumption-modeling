@@ -1,0 +1,18 @@
+{
+  "review_date": "2026-11-05",
+  "manifest_sha256": "fef0cac6ef123ee38193df25508418245db11796918fa07fc6ec1217c495d3e3",
+  "verification": {
+    "verified": true,
+    "artifacts": 6,
+    "rows": 7300,
+    "algorithm_matches_current": true,
+    "model_training_allowed": false
+  },
+  "parquet_hashes_equal_before_after_io_optimization": true,
+  "full_tests_passed": 301,
+  "skipped": 0,
+  "notebook_code_cells_executed": 3,
+  "notebook_errors": 0,
+  "native_unit_verification_unchanged": "pending",
+  "model_trained": false
+}

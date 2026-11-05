@@ -1,0 +1,23 @@
+{
+  "schema": "urban-water.counter-day-policy.v1",
+  "experiment_id": "hihaigua-counter-days-v1",
+  "purpose": "Inspect whether calendar-day targets are identifiable from recorded cumulative counters, without interpolation or an assumed volume unit.",
+  "start_date": "2025-01-01",
+  "end_exclusive": "2026-01-01",
+  "timezone": "UTC",
+  "timezone_basis": "Explicit UTC reference experiment; not a claim about household local time. Thesis Europe/Istanbul protocol is unchanged.",
+  "maximum_boundary_bracket_seconds": 630,
+  "interior_gap_warning_seconds": 630,
+  "boundary_rule": "Exact timestamp or finite monotone bracketing readings within the declared span. Equal counters resolve the boundary; otherwise retain bounds.",
+  "target_rule": "lower=max(0,end_lower-start_upper), upper=end_upper-start_lower. A point target exists only when lower==upper and the used source span has no invalid counters, clock conflicts or observed counter decreases.",
+  "interior_gap_rule": "Interior sampling gaps are reported. Cumulative differences can span them conditional on counter continuity; they are never filled with zero or interpolated.",
+  "assumptions": [
+    "Within a usable segment the counter is cumulative and nondecreasing, with no unrecorded reset, rollover, unit change or meter replacement.",
+    "Recorded epoch timestamps describe the source observation clock; physical clock accuracy and historic provider arrival times remain unverified.",
+    "Exact means identifiable in the recorded counter representation, not metrologically exact physical consumption."
+  ],
+  "availability_rule": "The label uses the first required reading at or after the day end; sample-clock availability is reported separately from the actual archive receipt.",
+  "midpoint_target_allowed": false,
+  "litre_conversion_allowed": false,
+  "model_training_allowed": false
+}

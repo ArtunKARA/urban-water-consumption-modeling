@@ -1,5 +1,7 @@
 version = 1
 status = "planned-not-executed"
+# Overall status refers to the full three-paper thesis protocol; scoped reference runs below
+# do not establish completion of the context, regional, distributed or formal experiments.
 environment = "synthetic-first"
 
 [anomaly_verification]
@@ -59,3 +61,10 @@ normal_examples = ["guest", "vacancy"]
 fault_examples = ["dropout", "delay", "duplicate", "counter_reset"]
 evaluation = "separate scenario-family reports; normal changes and transport/device faults are not confirmed leak labels"
 isolation = "hidden scenario truth remains outside input features; faults use quality/coverage states from observable evidence only"
+
+[reference_benchmarks.aalborg_daily_v1]
+status = "executed-retrospective-reference"
+protocol = "aalborg-daily-v1.toml"
+results = "results/aalborg-daily-v1.json"
+scope = "F01 point forecasts of the published preprocessed series; separate Copenhagen clock"
+limitations = "counterfactual hourly availability; not historical online, contextual or regional validation"

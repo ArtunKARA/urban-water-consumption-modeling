@@ -1,0 +1,199 @@
+{
+  "schema": "urban-water.counter-day-result.v1",
+  "review_date": "2026-11-05",
+  "prepared_at_utc": "2026-11-05T06:38:37.050157+00:00",
+  "experiment_id": "hihaigua-counter-days-v1",
+  "timezone": "UTC",
+  "policy_sha256": "c7f6b0ece74b87ab506f911ec09c3b1c5a0842fee29d0ace752db5be4833d9d4",
+  "source_manifest_sha256": "5c67edd6d85123028835f5b88dad43cd3dd170c542a52a28cdb72ff2bf0de895",
+  "source_archive_sha256": "5d80ae27cedec13d24689b043cfc414826f27aaeb06feb42979d4788a39135ad",
+  "source_prepared_directory": "var\\research\\hihaigua\\v2\\prepared\\b8ef0a75fbbd-53df8fe782f8",
+  "algorithm_sha256": "88f27194e620e3c69d571b5b4731c2dbcef6d7d83cfbd8cdec2ff5392cd94dac",
+  "runner_sha256": "3a202ab16d095a533411376757794a7b9225cc0574c1acc83cf4a460417154ce",
+  "components": {
+    "hotWater": {
+      "days": 3650,
+      "statuses": {
+        "unresolved": 300,
+        "exact_counter": 3310,
+        "bounded_counter": 40
+      },
+      "unresolved_reasons": {
+        "missing_left_boundary": 10,
+        "boundary_gap_exceeds_policy": 280,
+        "missing_right_boundary": 10,
+        "unusable_counter_in_evidence_span": 1,
+        "counter_decrease_in_evidence_span": 1
+      },
+      "days_with_internal_or_boundary_sampling_gaps": 1454,
+      "exact_counter_days_with_sampling_gaps": 1164,
+      "maximum_bounds_width_source_units": "0.0090000000000000000000000000000000000000",
+      "source_unit": null,
+      "label_delay_on_sample_clock_seconds": {
+        "n": 3350,
+        "minimum": 0.198,
+        "median": 214.5805,
+        "p95_nearest_rank": 401.101,
+        "maximum": 420.016,
+        "provider_arrival_delay_measured": false
+      },
+      "households": {
+        "HIHAIGUA-H00": {
+          "unresolved": 22,
+          "exact_counter": 339,
+          "bounded_counter": 4
+        },
+        "HIHAIGUA-H01": {
+          "unresolved": 69,
+          "exact_counter": 286,
+          "bounded_counter": 10
+        },
+        "HIHAIGUA-H02": {
+          "unresolved": 20,
+          "exact_counter": 341,
+          "bounded_counter": 4
+        },
+        "HIHAIGUA-H03": {
+          "unresolved": 18,
+          "exact_counter": 347
+        },
+        "HIHAIGUA-H04": {
+          "unresolved": 27,
+          "exact_counter": 338
+        },
+        "HIHAIGUA-H05": {
+          "unresolved": 42,
+          "exact_counter": 323
+        },
+        "HIHAIGUA-H06": {
+          "unresolved": 29,
+          "exact_counter": 336
+        },
+        "HIHAIGUA-H07": {
+          "unresolved": 24,
+          "exact_counter": 341
+        },
+        "HIHAIGUA-H08": {
+          "unresolved": 27,
+          "exact_counter": 320,
+          "bounded_counter": 18
+        },
+        "HIHAIGUA-H09": {
+          "unresolved": 22,
+          "exact_counter": 339,
+          "bounded_counter": 4
+        }
+      }
+    },
+    "water": {
+      "days": 3650,
+      "statuses": {
+        "unresolved": 298,
+        "exact_counter": 3184,
+        "bounded_counter": 168
+      },
+      "unresolved_reasons": {
+        "missing_left_boundary": 10,
+        "boundary_gap_exceeds_policy": 279,
+        "missing_right_boundary": 10
+      },
+      "days_with_internal_or_boundary_sampling_gaps": 1440,
+      "exact_counter_days_with_sampling_gaps": 1110,
+      "maximum_bounds_width_source_units": "0.0160000000000000000000000000000000000000",
+      "source_unit": null,
+      "label_delay_on_sample_clock_seconds": {
+        "n": 3352,
+        "minimum": 0.059,
+        "median": 212.4515,
+        "p95_nearest_rank": 398.219,
+        "maximum": 420.128,
+        "provider_arrival_delay_measured": false
+      },
+      "households": {
+        "HIHAIGUA-H00": {
+          "unresolved": 22,
+          "exact_counter": 335,
+          "bounded_counter": 8
+        },
+        "HIHAIGUA-H01": {
+          "unresolved": 69,
+          "exact_counter": 284,
+          "bounded_counter": 12
+        },
+        "HIHAIGUA-H02": {
+          "unresolved": 20,
+          "exact_counter": 337,
+          "bounded_counter": 8
+        },
+        "HIHAIGUA-H03": {
+          "unresolved": 17,
+          "bounded_counter": 39,
+          "exact_counter": 309
+        },
+        "HIHAIGUA-H04": {
+          "unresolved": 27,
+          "exact_counter": 332,
+          "bounded_counter": 6
+        },
+        "HIHAIGUA-H05": {
+          "unresolved": 40,
+          "exact_counter": 323,
+          "bounded_counter": 2
+        },
+        "HIHAIGUA-H06": {
+          "unresolved": 29,
+          "exact_counter": 322,
+          "bounded_counter": 14
+        },
+        "HIHAIGUA-H07": {
+          "unresolved": 24,
+          "exact_counter": 310,
+          "bounded_counter": 31
+        },
+        "HIHAIGUA-H08": {
+          "unresolved": 27,
+          "exact_counter": 306,
+          "bounded_counter": 32
+        },
+        "HIHAIGUA-H09": {
+          "unresolved": 23,
+          "exact_counter": 326,
+          "bounded_counter": 16
+        }
+      }
+    }
+  },
+  "artifacts": [
+    {
+      "path": "hotWater-daily.parquet",
+      "sha256": "07d1ebec6e5f38d9c3145348012b6b8ce35bb33a8b569d5d6efe8f9370d9cb6b",
+      "rows": 3650
+    },
+    {
+      "path": "water-daily.parquet",
+      "sha256": "21b9eb072dfbff23552064445351719a79ae3eed83407e1bb049e9141d066332",
+      "rows": 3650
+    },
+    {
+      "path": "policy.json",
+      "sha256": "c7f6b0ece74b87ab506f911ec09c3b1c5a0842fee29d0ace752db5be4833d9d4"
+    },
+    {
+      "path": "source-manifest.json",
+      "sha256": "5c67edd6d85123028835f5b88dad43cd3dd170c542a52a28cdb72ff2bf0de895"
+    },
+    {
+      "path": "target-status-by-household.png",
+      "sha256": "d981308d9ead7d21e4b85429145f0d6b660859a84454916ec10ecd87126f92d0"
+    },
+    {
+      "path": "target-status-by-household.svg",
+      "sha256": "3f9c89858d893173bb29eb019394e6076ec71fbd0b7baa1536ecfbf78af6644a"
+    }
+  ],
+  "availability_basis": "Required sample clock; archive receipt separate. Historic online availability not established.",
+  "exactness_basis": "Conditional recorded-counter identity; physical accuracy is unverified",
+  "model_training_allowed": false,
+  "litre_conversion_performed": false,
+  "prepared_directory": "var\\research\\hihaigua\\v2\\counter-days\\a14cdbba40b444c795c378cd486098e6"
+}

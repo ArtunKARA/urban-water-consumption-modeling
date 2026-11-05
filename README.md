@@ -58,6 +58,7 @@ yerel PostgreSQL'i başlatır; Windows servisi veya Docker kurmaz.
 packages/contracts/   Sürümlü ölçüm sözleşmesi, JSON Schema
 packages/core/        Registry, ingestion, kalite, hacim özeti, dataset, backup
 packages/simulator/   Bağımsız doğruluk örneği üretimi
+packages/research/    İsteğe bağlı öğrenme paketi; dondurulmuş veriden deneyler
 apps/cli/             Araştırmacı komutları
 apps/worker/          Kalıcı ingestion işlerini yürüten süreç
 migrations/           Sıralı, checksum korumalı PostgreSQL migration'ları
@@ -76,7 +77,7 @@ var/                  İzlenmeyen çalışma verileri, kaynaklar, dataset ve yed
 & $uv run python scripts/dev_database.py create-test-db
 & $uv run ruff check .
 & $uv run ruff format --check .
-& $uv run pytest -q
+& $uv run --extra research --extra notebooks pytest -q
 ```
 
 Testler yalnızca ayrı `_test` isimli DB'deki `uw` şemasını sıfırlar. Bu bilgisayardaki
@@ -84,6 +85,8 @@ işaretli yerel kümede `urban_water_test` kullanılır. Başka ortamda açıkç
 `UW_TEST_DATABASE_URL` verilmelidir. Test DB belirtilmemişse PostgreSQL testleri
 atlanır; bu durum uçtan uca doğrulama yapılmış sayılmaz. Restore testleri yeni geçici
 DB oluşturup kendi oluşturdukları DB'yi kaldırır; test hesabında CREATEDB yetkisi gerekir.
+Öğrenme testleri `research` extra'sını gerektirir; extra kurulmamışsa bu modül
+atlanır. Yukarıdaki tam test komutu bu bağımlılıkları da kurar.
 
 ## Notebook
 
@@ -104,6 +107,30 @@ Notebook yalnızca core'u çağırır; veri hazırlama mantığı kopyalamaz.
 konumlarını ve sınırları açıklar. `notebooks/02_aalborg_reference.ipynb` hazır
 saatlik/günlük snapshot'ları inceler. Bu adım model eğitimi içermez.
 
+İlk günlük model karşılaştırmasını çalıştırmak için:
+
+```powershell
+& $uv run --extra research --extra notebooks python scripts/run_daily_forecast.py
+```
+
+[Günlük tahmin sonuçları ve deney sınırları](docs/daily-forecast-reference.md)
+kaydedildi. `notebooks/03_daily_forecast_reference.ipynb` son başarılı koşumu inceler.
+
+[Açık veri kütüphanesi ve eleştirel değerlendirme](docs/public-data-library.md):
+11 katalog kaydından 56 özgün dosya indirildi; kaynakları korunarak ayrı Parquet
+tabloları hazırlandı. [Kaynak kataloğu](research/reference_data/public-source-catalog.v1.json)
+ve [51 alanın kaynak karşılıkları](research/reference_data/public-data-field-coverage.v1.json)
+lisans, birim, zaman, kapsam ve etiket sınırlarını kaydeder. Yeni kaynakların
+kanonik eğitim adaptörleri bu inceleme katmanından sonra tamamlanacaktır.
+
+[hihAigua kaynak adaptörü](docs/hihaigua-reference.md), 10 hanenin 20 ayrı su
+akışını gerçek dosyalardan hazırlıyor. Birim kanıtı eksikken kanonik yayını kapalı
+tutuyor; `notebooks/04_hihaigua_reference.ipynb` kaynak/kalite incelemesini açar.
+
+[Günlük sayaç hedefi incelemesi](docs/hihaigua-counter-days.md), UTC günlerinde
+endeksten tek değer/aralık çıkarıyor; eksik gün veya sınır tüketimi uydurmuyor.
+`notebooks/05_hihaigua_counter_days.ipynb` sonuçları ve hane grafiğini gösterir.
+
 ## Belgeler ve kapsam
 
 - [Kaynak → veri → ilişki → model → çıktı diyagramları — v0.1 taslak](docs/contracts/research-data-model.md)
@@ -118,6 +145,10 @@ saatlik/günlük snapshot'ları inceler. Bu adım model eğitimi içermez.
 - [Dosya/HTTP kaynak noktaları — çalışan kod ve kullanım](docs/source-adapters-usage.md)
 - [Sentetik veri → açık araştırma verisi → API geçiş planı](docs/research-data-bootstrap.md)
 - [İlk açık araştırma verisi: Aalborg — aktarım, sonuçlar ve sınırlar](docs/aalborg-reference.md)
+- [İlk günlük model karşılaştırması — F01 açık veri referansı](docs/daily-forecast-reference.md)
+- [İndirilen açık veriler, uygunluk analizi ve hazırlama komutları](docs/public-data-library.md)
+- [hihAigua adaptörü — gerçek kaynak hazırlığı, kalite ve birim kapısı](docs/hihaigua-reference.md)
+- [hihAigua günlük hedefleri — tek değer, aralık, bilgi zamanı ve sınırlar](docs/hihaigua-counter-days.md)
 - [Veri sözlüğü](docs/data-dictionary.md)
 - [Yedekleme, kurtarma ve işletim](docs/operations.md)
 - [Araştırma protokolleri](research/experiments/protocols.toml)

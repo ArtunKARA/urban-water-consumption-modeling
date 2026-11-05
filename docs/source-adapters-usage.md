@@ -127,8 +127,9 @@ runtime ortamlarına `production` eklenmedi.
 
 Anket, meteoroloji, bölgesel tüketim ve diğer araştırma kayıtlarının yayın
 yolları henüz uygulanmadı. [Aalborg yıllık kohortu](aalborg-reference.md) 4 Kasım'da
-bağlandı; sentetik üretici kalibrasyonu ve eğitimler
-[araştırma başlangıç planındaki](research-data-bootstrap.md) sonraki iştir.
+bağlandı ve [ilk günlük referans deneyi](daily-forecast-reference.md) çalıştırıldı.
+Sentetik kalibrasyon ve kalan eğitimler [başlangıç planındaki](research-data-bootstrap.md)
+sonraki iştir.
 
 ## Bu teslimatın doğrulaması
 

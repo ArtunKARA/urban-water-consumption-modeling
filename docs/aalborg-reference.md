@@ -1,7 +1,8 @@
 # İlk açık araştırma verisi: Aalborg v1
 
 4 Kasım 2026. Yayımlanmış veri, yerel dosya → adaptör → ortak veri katmanı →
-saatlik/günlük dataset yoluna bağlandı. Model eğitimi bu teslimatın sonraki adımıdır.
+saatlik/günlük dataset yoluna bağlandı. Ardından ayrı protokolle
+[ilk günlük tahmin deneyi](daily-forecast-reference.md) çalıştırıldı.
 
 Kaynak: Schaffer ve diğerleri (2025),
 [Residential Household Dataset](https://zenodo.org/records/15180141), sabit v1,
@@ -100,10 +101,10 @@ saatleri etkili olabilir. İlk tahmin deneyi **yayımlanmış işlenmiş seri ü
 geriye dönük karşılaştırma** olarak tanımlanmalı. Gerçek zamanlı ham tüketim veya
 kaçak başarısı için uygun ham veri ve yalnız geçmişe bakan ön işleme ayrıca gerekir.
 
-Sonraki adım tam günleri seçip zaman sıralı train/validation/test sınırlarını
-sabitlemek ve ilk geçmişe dayalı karşılaştırmayı çalıştırmaktır. 2026'daki arşiv
-alımı 2022'deki sağlayıcı teslimat saatini kanıtlamaz; 18:00/23:00 deneyi ayrı bir
-erişim politikası gerektirir. Anket, gelir, hava, doğrulanmış kaçak etiketleri bu
+Tam gün seçimi ve zaman sıralı train/validation/test ayrımı,
+[ayrı günlük deneyde](daily-forecast-reference.md) uygulandı. 2026'daki arşiv
+alımı 2022'deki sağlayıcı teslimat saatini kanıtlamaz; 18:00/23:00 deneyi açık
+bir erişim varsayımıyla yapıldı. Anket, gelir, hava, doğrulanmış kaçak etiketleri bu
 kaynaktan türetilmiş sayılmaz. Ayrı 8 binalı günlük/doluluk kohortu bu ilk yıllık
 kohorta katılmadı.
 

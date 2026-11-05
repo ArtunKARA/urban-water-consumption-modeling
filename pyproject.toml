@@ -9,6 +9,7 @@ dependencies = [
 
 [project.optional-dependencies]
 notebooks = ["ipykernel>=6,<8", "nbclient>=0.10,<1"]
+research = ["urban-water-research"]
 
 [tool.uv.workspace]
 members = ["packages/*", "apps/*"]
@@ -19,6 +20,7 @@ urban-water-core = { workspace = true }
 urban-water-simulator = { workspace = true }
 urban-water-cli = { workspace = true }
 urban-water-worker = { workspace = true }
+urban-water-research = { workspace = true }
 
 [dependency-groups]
 dev = ["pytest>=8,<10", "ruff>=0.11,<1", "jsonschema>=4,<5"]
@@ -26,7 +28,10 @@ dev = ["pytest>=8,<10", "ruff>=0.11,<1", "jsonschema>=4,<5"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
-markers = ["postgres: requires an isolated PostgreSQL test database"]
+markers = [
+  "postgres: requires an isolated PostgreSQL test database",
+  "research: requires the optional research dependencies",
+]
 
 [tool.ruff]
 target-version = "py312"
